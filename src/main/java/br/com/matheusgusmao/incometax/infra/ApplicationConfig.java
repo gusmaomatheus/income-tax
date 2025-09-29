@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.infra.security;
+package br.com.matheusgusmao.incometax.infra;
 
 import br.com.matheusgusmao.incometax.infra.security.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
