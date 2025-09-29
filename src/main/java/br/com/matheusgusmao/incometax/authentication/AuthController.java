@@ -77,7 +77,7 @@ public class AuthController {
                     content = @Content(schema = @Schema(hidden = true))
             )
     })
-    @PostMapping("/authenticate")
+    @PostMapping("/auth")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequest request) {
         final AuthResponse response = authService.authenticate(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
