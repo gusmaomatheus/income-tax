@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.infra.security.user.domain;
+package br.com.matheusgusmao.incometax.infra.security.user.repository;
 
 import br.com.matheusgusmao.incometax.infra.security.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
