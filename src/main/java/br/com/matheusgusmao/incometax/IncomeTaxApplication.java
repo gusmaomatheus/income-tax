@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class IncometaxApplication {
+public class IncomeTaxApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(IncometaxApplication.class, args);
+		SpringApplication.run(IncomeTaxApplication.class, args);
 	}
 
 }
