@@ -1,6 +1,6 @@
 package br.com.matheusgusmao.incometax.infra;
 
-import br.com.matheusgusmao.incometax.infra.security.user.repository.UserRepository;
+import br.com.matheusgusmao.incometax.infra.persistence.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
