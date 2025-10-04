@@ -4,7 +4,7 @@ import br.com.matheusgusmao.incometax.auth.dto.auth.AuthRequest;
 import br.com.matheusgusmao.incometax.auth.dto.auth.AuthResponse;
 import br.com.matheusgusmao.incometax.auth.dto.register.RegisterUserRequest;
 import br.com.matheusgusmao.incometax.auth.dto.register.RegisterUserResponse;
-import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExists;
+import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import br.com.matheusgusmao.incometax.infra.security.config.jwt.JwtService;
 import br.com.matheusgusmao.incometax.infra.security.user.Role;
 import br.com.matheusgusmao.incometax.infra.security.user.UserEntity;
@@ -28,7 +28,7 @@ public class AuthService {
 
     public RegisterUserResponse register(RegisterUserRequest request) {
         userRepository.findByEmail(request.email()).ifPresent(_ -> {
-            throw new EntityAlreadyExists("Email already registered: " + request.email());
+            throw new EntityAlreadyExistsException("Email already registered: " + request.email());
         });
 
         final String encodedPassword = passwordEncoder.encode(request.password());

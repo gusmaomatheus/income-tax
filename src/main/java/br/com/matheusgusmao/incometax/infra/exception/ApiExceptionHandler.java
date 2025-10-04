@@ -1,6 +1,6 @@
 package br.com.matheusgusmao.incometax.infra.exception;
 
-import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExists;
+import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,8 +26,8 @@ public class ApiExceptionHandler {
         return new ResponseEntity<>(apiException, status);
     }
 
-    @ExceptionHandler(value = EntityAlreadyExists.class)
-    public ResponseEntity<?> handleEntityAlreadyExists(EntityAlreadyExists exception) {
+    @ExceptionHandler(value = EntityAlreadyExistsException.class)
+    public ResponseEntity<?> handleEntityAlreadyExists(EntityAlreadyExistsException exception) {
         final HttpStatus status = CONFLICT;
         final ApiException apiException = ApiException.builder()
                 .status(status)
