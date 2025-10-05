@@ -1,6 +1,6 @@
-package br.com.matheusgusmao.incometax.infra.persistence;
+package br.com.matheusgusmao.incometax.infra.persistence.repository;
 
-import br.com.matheusgusmao.incometax.infra.security.user.UserEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.user.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

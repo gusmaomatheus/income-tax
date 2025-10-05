@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.auth.dto.register;
+package br.com.matheusgusmao.incometax.web.dto.register;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.infra.security.user;
+package br.com.matheusgusmao.incometax.infra.persistence.entity.user;
 
 import jakarta.persistence.*;
 import lombok.*;

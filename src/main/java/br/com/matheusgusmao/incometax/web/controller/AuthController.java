@@ -1,9 +1,10 @@
-package br.com.matheusgusmao.incometax.auth;
+package br.com.matheusgusmao.incometax.web.controller;
 
-import br.com.matheusgusmao.incometax.auth.dto.auth.AuthRequest;
-import br.com.matheusgusmao.incometax.auth.dto.auth.AuthResponse;
-import br.com.matheusgusmao.incometax.auth.dto.register.RegisterUserRequest;
-import br.com.matheusgusmao.incometax.auth.dto.register.RegisterUserResponse;
+import br.com.matheusgusmao.incometax.web.dto.auth.AuthRequest;
+import br.com.matheusgusmao.incometax.web.dto.auth.AuthResponse;
+import br.com.matheusgusmao.incometax.web.dto.register.RegisterUserRequest;
+import br.com.matheusgusmao.incometax.web.dto.register.RegisterUserResponse;
+import br.com.matheusgusmao.incometax.domain.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

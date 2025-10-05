@@ -1,6 +1,6 @@
-package br.com.matheusgusmao.incometax.infra.security.config;
+package br.com.matheusgusmao.incometax.infra.security;
 
-import br.com.matheusgusmao.incometax.infra.security.config.jwt.JwtAuthenticationFilter;
+import br.com.matheusgusmao.incometax.infra.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

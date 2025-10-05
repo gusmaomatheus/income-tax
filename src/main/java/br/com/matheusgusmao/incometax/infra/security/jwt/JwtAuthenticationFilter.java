@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.infra.security.config.jwt;
+package br.com.matheusgusmao.incometax.infra.security.jwt;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
