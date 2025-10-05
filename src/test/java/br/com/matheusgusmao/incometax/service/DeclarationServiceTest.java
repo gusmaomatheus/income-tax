@@ -4,6 +4,7 @@ import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
 import br.com.matheusgusmao.incometax.domain.repository.DeclarationRepository;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
+import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -14,11 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DeclarationServiceTest {
@@ -52,5 +51,19 @@ public class DeclarationServiceTest {
 
         verify(declarationRepository).existsByTaxpayerIdAndYear(taxpayerId, year);
         verify(declarationRepository).save(any(Declaration.class));
+    }
+
+    @Test
+    @Tag("TDD")
+    @Tag("UnitTest")
+    @DisplayName("[Scenario] Should prevent duplicate declaration in the same year")
+    void shouldThrowExceptionWhenDeclarationForSameYearAlreadyExists() {
+        final UUID taxpayerId = UUID.randomUUID();
+        final int year = 2025;
+        when(declarationRepository.existsByTaxpayerIdAndYear(taxpayerId, year)).thenReturn(true);
+
+        assertThrows(EntityAlreadyExistsException.class, () -> declarationService.createNewDeclaration(taxpayerId, year));
+
+        verify(declarationRepository, never()).save(any(Declaration.class));
     }
 }
