@@ -1,25 +1,37 @@
 package br.com.matheusgusmao.incometax.domain.service;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
-import br.com.matheusgusmao.incometax.domain.repository.DeclarationRepository;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
+import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Service
 public class DeclarationService {
 
     private final DeclarationRepository declarationRepository;
+    private final DeclarationMapper declarationMapper;
 
-    public DeclarationService(final DeclarationRepository declarationRepository) {
+    public DeclarationService(final DeclarationRepository declarationRepository, final DeclarationMapper declarationMapper) {
         this.declarationRepository = declarationRepository;
+        this.declarationMapper = declarationMapper;
     }
 
+    @Transactional
     public Declaration createNewDeclaration(UUID taxpayerId, int year) {
         if (declarationRepository.existsByTaxpayerIdAndYear(taxpayerId, year)) {
             throw new EntityAlreadyExistsException("A declaration for the given taxpayer and year already exists.");
         }
 
         Declaration newDeclaration = new Declaration(taxpayerId, year);
-        return declarationRepository.save(newDeclaration);
+
+        DeclarationEntity entityToSave = declarationMapper.toEntity(newDeclaration);
+        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
     }
 }
