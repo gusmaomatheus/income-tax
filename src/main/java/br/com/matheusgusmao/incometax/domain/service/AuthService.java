@@ -33,11 +33,11 @@ public class AuthService {
 
         final String encodedPassword = passwordEncoder.encode(request.password());
         final UUID uuid = UUID.randomUUID();
-        final UserEntity user = UserEntity.builder().id(uuid).firstName(request.firstName()).lastName(request.lastname()).email(request.email()).password(encodedPassword).role(Role.USER).build();
+        final UserEntity user = UserEntity.builder().id(uuid).firstName(request.firstName()).lastName(request.lastName()).email(request.email()).password(encodedPassword).role(Role.USER).build();
 
-        userRepository.save(user);
+        final UserEntity savedUser = userRepository.save(user);
 
-        return new RegisterUserResponse(uuid);
+        return new RegisterUserResponse(savedUser.getId());
     }
 
     public AuthResponse authenticate(AuthRequest request) {
