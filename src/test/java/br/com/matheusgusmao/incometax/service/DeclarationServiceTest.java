@@ -2,6 +2,7 @@ package br.com.matheusgusmao.incometax.service;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
+import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
