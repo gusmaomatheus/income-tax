@@ -2,10 +2,10 @@ package br.com.matheusgusmao.incometax.service;
 
 import br.com.matheusgusmao.incometax.domain.service.DependentService;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
-import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DependentEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DependentEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DependentRepository;
-import br.com.matheusgusmao.incometax.web.dto.declaration.CreateDependentRequest;
+import br.com.matheusgusmao.incometax.web.dto.dependent.CreateDependentRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,8 +49,8 @@ class DependentServiceTest {
         var response = dependentService.addDependent(declarationId, request);
 
         assertNotNull(response);
-        assertEquals("Maria", response.getName());
-        assertEquals("12345678901", response.getCpf());
+        assertEquals("Maria", response.name());
+        assertEquals("12345678901", response.cpf());
     }
 
     @Test
