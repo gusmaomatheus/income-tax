@@ -1,12 +1,15 @@
 package br.com.matheusgusmao.incometax.infra.persistence.entity.declaration;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.income.IncomeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -30,4 +33,7 @@ public class DeclarationEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private DeclarationStatus status;
+
+    @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<IncomeEntity> incomes = new ArrayList<>();
 }
