@@ -3,7 +3,9 @@ package br.com.matheusgusmao.incometax.infra.persistence.mapper;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.income.IncomeEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class IncomeMapper {
     public IncomeEntity toEntity(Income domain, DeclarationEntity declarationEntity) {
         if (domain == null) return null;
