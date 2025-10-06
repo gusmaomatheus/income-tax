@@ -209,4 +209,18 @@ public class DeclarationServiceTest {
         verify(declarationRepository).save(any(DeclarationEntity.class));
     }
 
+    @Test
+    @DisplayName("US4-[Scenario] Should reject expense with zero or negative value")
+    void shouldRejectExpenseWithZeroValue() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, BigDecimal.ZERO)
+        );
+        assertThrows(IllegalArgumentException.class,
+                () -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, new BigDecimal("-100"))
+        );
+    }
+
+
+
+
 }
