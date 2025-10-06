@@ -10,6 +10,7 @@ import br.com.matheusgusmao.incometax.web.dto.declaration.CreateDependentRequest
 import br.com.matheusgusmao.incometax.web.dto.declaration.DependentResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Cpf;
 
 import java.util.Optional;
 
@@ -27,11 +28,9 @@ public class DependentService {
 
     @Transactional
     public DependentResponse addDependent(Long declarationId, CreateDependentRequest request) {
-        if (!isValidCpf(request.getCpf())) {
-            throw new IllegalArgumentException("CPF inválido");
-        }
+        Cpf cpf = new Cpf(request.cpf());
 
-        Optional<DependentEntity> existing = dependentRepository.findByCpf(request.getCpf());
+        Optional<DependentEntity> existing = dependentRepository.findByCpf(cpf.getValue());
         if (existing.isPresent()) {
             throw new IllegalArgumentException("Dependente já cadastrado");
         }
@@ -39,7 +38,7 @@ public class DependentService {
         DeclarationEntity declaration = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new IllegalArgumentException("Declaração não encontrada"));
 
-        Dependent dependent = new Dependent(request.getName(), request.getCpf(), request.getBirthDate());
+        Dependent dependent = new Dependent(request.name(), cpf, request.birthDate());
         DependentEntity dependentEntity = dependentMapper.toEntity(dependent);
         dependentEntity.setDeclaration(declaration);
 
@@ -47,15 +46,6 @@ public class DependentService {
 
         Dependent savedDependent = dependentMapper.toDomain(dependentEntity);
 
-        DependentResponse response = new DependentResponse();
-        response.setId(savedDependent.getId());
-        response.setName(savedDependent.getName());
-        response.setCpf(savedDependent.getCpf());
-        response.setBirthDate(savedDependent.getBirthDate());
-        return response;
-    }
-
-    private boolean isValidCpf(String cpf) {
-        return cpf != null && cpf.matches("\\d{11}");
+        return DependentResponse.from(savedDependent);
     }
 }
