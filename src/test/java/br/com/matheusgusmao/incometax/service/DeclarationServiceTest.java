@@ -220,6 +220,26 @@ public class DeclarationServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("[US4-[Scenario] Should accept a non-deductible expense")
+    void shouldAcceptNonDeductibleExpense() {
+        final Long declarationId = 1L;
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeductibleExpense expense = new DeductibleExpense("Assinatura de revista", ExpenseType.OTHER, new BigDecimal("50.00"));
+        Declaration result = declarationService.addDeductibleExpense(declarationId, expense);
+
+        assertNotNull(result);
+        assertEquals(1, result.getDeductibleExpenses().size());
+        assertEquals(ExpenseType.OTHER, result.getDeductibleExpenses().get(0).getType());
+    }
+
+
+
 
 
 
