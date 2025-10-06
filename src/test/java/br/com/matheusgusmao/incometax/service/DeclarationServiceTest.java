@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -186,6 +187,26 @@ public class DeclarationServiceTest {
 
         assertEquals("Income not found with id: " + nonExistentIncomeId, exception.getMessage());
         verify(declarationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("US4-[Scenario] Should add a deductible health expense successfully")
+    void shouldAddDeductibleHealthExpenseSuccessfully() {
+        final Long declarationId = 1L;
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeductibleExpense expense = new DeductibleExpense("Consulta médica", ExpenseType.HEALTH, new BigDecimal("350.00"));
+        Declaration result = declarationService.addDeductibleExpense(declarationId, expense);
+
+        assertNotNull(result);
+        assertEquals(1, result.getDeductibleExpenses().size());
+        assertThat(result.getDeductibleExpenses()).first().usingRecursiveComparison().isEqualTo(expense);
+        verify(declarationRepository).findById(declarationId);
+        verify(declarationRepository).save(any(DeclarationEntity.class));
     }
 
 }
