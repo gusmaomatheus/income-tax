@@ -109,4 +109,30 @@ public class DeclarationServiceTest {
         verify(declarationRepository, never()).save(any());
     }
 
+    @Test
+    @DisplayName("US2-[Scenario] Should allow different incomes from the same source")
+    void shouldAllowDifferentIncomesFromSameSource() {
+        final Long declarationId = 1L;
+        final Income income1 = new Income("Company C", IncomeType.SALARY, new BigDecimal("60000.00"));
+        final Income income2 = new Income("Company C", IncomeType.VACATION, new BigDecimal("5000.00"));
+
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+        existingDeclarationEntity.setTaxpayerId(UUID.randomUUID());
+        existingDeclarationEntity.setYear(2025);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        declarationService.addIncome(declarationId, income1);
+
+        Declaration updatedDeclaration = declarationService.addIncome(declarationId, income2);
+
+        assertNotNull(updatedDeclaration);
+        assertEquals(2, updatedDeclaration.getIncomes().size());
+        verify(declarationRepository, times(2)).findById(declarationId);
+        verify(declarationRepository, times(2)).save(any(DeclarationEntity.class));
+    }
+
 }
