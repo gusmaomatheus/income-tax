@@ -1,7 +1,10 @@
 package br.com.matheusgusmao.incometax.domain.model.declaration;
 
+import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -13,6 +16,7 @@ public final class Declaration {
     private final UUID taxpayerId;
     private final int year;
     private final DeclarationStatus status;
+    private final List<Income> incomes;
 
     private static final Pattern YEAR_REGEX_PATTERN = Pattern.compile("^\\d{4}$");
 
@@ -27,6 +31,7 @@ public final class Declaration {
         this.taxpayerId = taxpayerId;
         this.year = year;
         this.status = DeclarationStatus.EDITING;
+        this.incomes = new ArrayList<>();
     }
 
     public Declaration(Long id, UUID taxpayerId, int year, DeclarationStatus status) {
@@ -34,5 +39,13 @@ public final class Declaration {
         this.taxpayerId = taxpayerId;
         this.year = year;
         this.status = status;
+        this.incomes = new ArrayList<>();
+
+    }
+    public void addIncome(Income income) {
+        if (this.status != DeclarationStatus.EDITING) {
+            throw new IllegalStateException("Cannot add income to a declaration that is not in editing status.");
+        }
+        this.incomes.add(income);
     }
 }
