@@ -49,4 +49,18 @@ public class DeclarationService {
 
         return declarationMapper.toDomain(savedEntity);
     }
+
+    @Transactional
+    public Declaration removeIncome(Long declarationId, Long incomeId) {
+        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.removeIncome(incomeId);
+
+        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
+        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
+    }
 }
