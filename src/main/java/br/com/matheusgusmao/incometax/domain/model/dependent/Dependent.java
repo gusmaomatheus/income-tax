@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.domain.model.declaration;
+package br.com.matheusgusmao.incometax.domain.model.dependent;
 
 import lombok.Getter;
 import lombok.Setter;

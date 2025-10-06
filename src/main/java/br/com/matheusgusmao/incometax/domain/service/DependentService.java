@@ -1,13 +1,13 @@
 package br.com.matheusgusmao.incometax.domain.service;
 
-import br.com.matheusgusmao.incometax.domain.model.declaration.Dependent;
-import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
-import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DependentEntity;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DeclarationEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DependentEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DependentMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DependentRepository;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
-import br.com.matheusgusmao.incometax.web.dto.declaration.CreateDependentRequest;
-import br.com.matheusgusmao.incometax.web.dto.declaration.DependentResponse;
+import br.com.matheusgusmao.incometax.web.dto.dependent.CreateDependentRequest;
+import br.com.matheusgusmao.incometax.web.dto.dependent.DependentResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import br.com.matheusgusmao.incometax.domain.model.dependent.Cpf;
