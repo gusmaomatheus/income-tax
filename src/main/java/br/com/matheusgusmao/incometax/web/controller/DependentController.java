@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/declarations/{declarationId}/dependents")
+@RequestMapping("/declarations/{declarationId}/dependents") 
 public class DependentController {
 
     private final DependentService dependentService;
@@ -21,6 +21,6 @@ public class DependentController {
             @PathVariable Long declarationId,
             @RequestBody CreateDependentRequest request) {
         DependentResponse response = dependentService.addDependent(declarationId, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(201).body(response);
     }
 }
