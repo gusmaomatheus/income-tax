@@ -1,6 +1,7 @@
 package br.com.matheusgusmao.incometax.domain.model.declaration;
 
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 
 import java.util.ArrayList;
@@ -47,5 +48,18 @@ public final class Declaration {
             throw new IllegalStateException("Cannot add income to a declaration that is not in editing status.");
         }
         this.incomes.add(income);
+    }
+
+    public void removeIncome(Long incomeId) {
+        if (this.status != DeclarationStatus.EDITING) {
+            throw new IllegalStateException("Cannot remove income from a declaration that is not in editing status.");
+        }
+
+        Income incomeToRemove = this.incomes.stream()
+                .filter(income -> income.getId().equals(incomeId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Income not found with id: " + incomeId));
+
+        this.incomes.remove(incomeToRemove);
     }
 }
