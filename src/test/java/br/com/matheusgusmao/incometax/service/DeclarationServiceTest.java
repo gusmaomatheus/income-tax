@@ -1,6 +1,7 @@
 package br.com.matheusgusmao.incometax.service;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
+import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
@@ -14,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +36,7 @@ public class DeclarationServiceTest {
     private DeclarationService declarationService;
 
     @Test
-    @DisplayName("[Scenario] Should create new declaration successfully")
+    @DisplayName("US1-[Scenario] Should create new declaration successfully")
     void shouldCreateNewDeclarationSuccessfullyWhenNonExistent() {
         final UUID taxpayerId = UUID.randomUUID();
         final int year = 2025;
@@ -55,7 +58,7 @@ public class DeclarationServiceTest {
     }
 
     @Test
-    @DisplayName("[Scenario] Should prevent duplicate declaration in the same year")
+    @DisplayName("US1-[Scenario] Should prevent duplicate declaration in the same year")
     void shouldThrowExceptionWhenDeclarationForSameYearAlreadyExists() {
         final UUID taxpayerId = UUID.randomUUID();
         final int year = 2025;
@@ -67,4 +70,29 @@ public class DeclarationServiceTest {
 
         verify(declarationRepository, never()).save(any(DeclarationEntity.class));
     }
+
+    @Test
+    @DisplayName("[US2-[Scenario] Should add a valid income to a declaration")
+    void shouldAddValidIncomeToDeclaration() {
+        final Long declarationId = 1L;
+        final Income newIncome = new Income("Company A", IncomeType.SALARY, new BigDecimal("50000.00"));
+
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+        existingDeclarationEntity.setTaxpayerId(UUID.randomUUID());
+        existingDeclarationEntity.setYear(2025);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        Declaration updatedDeclaration = declarationService.addIncome(declarationId, newIncome);
+
+        assertNotNull(updatedDeclaration);
+        assertEquals(1, updatedDeclaration.getIncomes().size());
+        assertEquals("Company A", updatedDeclaration.getIncomes().get(0).getPayingSource());
+        verify(declarationRepository).findById(declarationId);
+        verify(declarationRepository).save(any(DeclarationEntity.class));
+    }
+
 }
