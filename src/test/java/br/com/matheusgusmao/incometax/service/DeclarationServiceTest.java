@@ -9,6 +9,7 @@ import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExists
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -135,6 +136,56 @@ public class DeclarationServiceTest {
         assertEquals(2, updatedDeclaration.getIncomes().size());
         verify(declarationRepository, times(2)).findById(declarationId);
         verify(declarationRepository, times(2)).save(any(DeclarationEntity.class));
+    }
+
+    @Test
+    @DisplayName("US2-[Scenario] Should remove an income successfully")
+    void shouldRemoveIncomeSuccessfully() {
+        final Long declarationId = 1L;
+        final Long incomeIdToRemove = 10L;
+
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+
+        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING);
+        Income income = new Income(incomeIdToRemove, "Company A", IncomeType.SALARY, new BigDecimal("50000"));
+        declarationDomain.addIncome(income);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        Declaration updatedDeclaration = declarationService.removeIncome(declarationId, incomeIdToRemove);
+
+        assertNotNull(updatedDeclaration);
+        assertTrue(updatedDeclaration.getIncomes().isEmpty());
+        assertThat(updatedDeclaration.getIncomes()).noneMatch(i -> i.getId().equals(incomeIdToRemove));
+        verify(declarationRepository).findById(declarationId);
+        verify(declarationRepository).save(any(DeclarationEntity.class));
+    }
+
+    @Test
+    @DisplayName("US2-[Scenario] Should throw exception when trying to remove a non-existent income")
+    void shouldThrowExceptionWhenRemovingNonExistentIncome() {
+        final Long declarationId = 1L;
+        final Long nonExistentIncomeId = 99L;
+
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+
+        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
+
+        Exception exception = assertThrows(EntityNotFoundException.class,
+                () -> declarationService.removeIncome(declarationId, nonExistentIncomeId)
+        );
+
+        assertEquals("Income not found with id: " + nonExistentIncomeId, exception.getMessage());
+        verify(declarationRepository, never()).save(any());
     }
 
 }
