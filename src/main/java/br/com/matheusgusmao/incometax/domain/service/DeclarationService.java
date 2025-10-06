@@ -1,10 +1,12 @@
 package br.com.matheusgusmao.incometax.domain.service;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
+import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,33 @@ public class DeclarationService {
         Declaration newDeclaration = new Declaration(taxpayerId, year);
 
         DeclarationEntity entityToSave = declarationMapper.toEntity(newDeclaration);
+        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
+    }
+    @Transactional
+    public Declaration addIncome(Long declarationId, Income income) {
+        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.addIncome(income);
+
+        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
+        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
+    }
+
+    @Transactional
+    public Declaration removeIncome(Long declarationId, Long incomeId) {
+        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.removeIncome(incomeId);
+
+        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
         DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
