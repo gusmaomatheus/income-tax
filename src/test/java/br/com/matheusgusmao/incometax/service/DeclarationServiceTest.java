@@ -72,7 +72,7 @@ public class DeclarationServiceTest {
     }
 
     @Test
-    @DisplayName("[US2-[Scenario] Should add a valid income to a declaration")
+    @DisplayName("US2-[Scenario] Should add a valid income to a declaration")
     void shouldAddValidIncomeToDeclaration() {
         final Long declarationId = 1L;
         final Income newIncome = new Income("Company A", IncomeType.SALARY, new BigDecimal("50000.00"));
@@ -93,6 +93,20 @@ public class DeclarationServiceTest {
         assertEquals("Company A", updatedDeclaration.getIncomes().get(0).getPayingSource());
         verify(declarationRepository).findById(declarationId);
         verify(declarationRepository).save(any(DeclarationEntity.class));
+    }
+
+    @Test
+    @DisplayName("US2-[Scenario] Should prevent adding income with a negative value")
+    void shouldPreventAddingIncomeWithNegativeValue() {
+        final Long declarationId = 1L;
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Income("Company B", IncomeType.OTHER, new BigDecimal("-100.00"));
+        });
+
+        assertEquals("Income value cannot be negative.", exception.getMessage());
+        verify(declarationRepository, never()).findById(any());
+        verify(declarationRepository, never()).save(any());
     }
 
 }
