@@ -69,4 +69,12 @@ public class DeclarationController {
 
         return ResponseEntity.created(location).body(DeclarationResponse.from(newDeclaration));
     }
+    @GetMapping("/history")
+    public ResponseEntity<?> getHistory(@RequestParam UUID taxpayerId) {
+        List<DeclarationHistoryResponse> history = declarationService.getDeclarationHistory(taxpayerId);
+        if (history.isEmpty()) {
+                return ResponseEntity.ok("Nenhuma declaração encontrada");
+        }
+        return ResponseEntity.ok(history);
+    }
 }
