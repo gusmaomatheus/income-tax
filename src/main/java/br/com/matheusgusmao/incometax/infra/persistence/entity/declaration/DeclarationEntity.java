@@ -1,6 +1,7 @@
 package br.com.matheusgusmao.incometax.infra.persistence.entity.declaration;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.expense.DeductibleExpenseEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.income.IncomeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -36,4 +37,7 @@ public class DeclarationEntity {
 
     @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<IncomeEntity> incomes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<DeductibleExpenseEntity> deductibleExpenses = new ArrayList<>();
 }
