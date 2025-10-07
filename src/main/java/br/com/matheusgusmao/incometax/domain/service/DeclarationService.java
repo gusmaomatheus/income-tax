@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationHistoryResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service

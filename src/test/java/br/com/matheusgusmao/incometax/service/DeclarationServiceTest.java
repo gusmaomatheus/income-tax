@@ -199,13 +199,13 @@ public class DeclarationServiceTest {
         d1.setId(1L);
         d1.setTaxpayerId(taxpayerId);
         d1.setYear(2022);
-        d1.setStatus(DeclarationStatus.SUBMITTED);
+        d1.setStatus(DeclarationStatus.EDITING);
 
         DeclarationEntity d2 = new DeclarationEntity();
         d2.setId(2L);
         d2.setTaxpayerId(taxpayerId);
         d2.setYear(2023);
-        d2.setStatus(DeclarationStatus.OPEN);
+        d2.setStatus(DeclarationStatus.EDITING);
 
         when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of(d1, d2));
 
@@ -213,9 +213,9 @@ public class DeclarationServiceTest {
 
         assertEquals(2, result.size());
         assertEquals(2022, result.get(0).year());
-        assertEquals("SUBMITTED", result.get(0).status());
+        assertEquals("EDITING", result.get(0).status());
         assertEquals(2023, result.get(1).year());
-        assertEquals("OPEN", result.get(1).status());
+        assertEquals("EDITING", result.get(1).status());
     }
 
     @Test
