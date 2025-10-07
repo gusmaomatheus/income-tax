@@ -1,8 +1,8 @@
 package br.com.matheusgusmao.incometax.web.controller;
 
 import br.com.matheusgusmao.incometax.domain.service.DependentService;
-import br.com.matheusgusmao.incometax.web.dto.declaration.CreateDependentRequest;
-import br.com.matheusgusmao.incometax.web.dto.declaration.DependentResponse;
+import br.com.matheusgusmao.incometax.web.dto.dependent.CreateDependentRequest;
+import br.com.matheusgusmao.incometax.web.dto.dependent.DependentResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
