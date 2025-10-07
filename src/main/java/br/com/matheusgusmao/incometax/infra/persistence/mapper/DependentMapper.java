@@ -1,8 +1,8 @@
 package br.com.matheusgusmao.incometax.infra.persistence.mapper;
 
-import br.com.matheusgusmao.incometax.domain.model.declaration.Cpf;
-import br.com.matheusgusmao.incometax.domain.model.declaration.Dependent;
-import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DependentEntity;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Cpf;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DependentEntity;
 
 public class DependentMapper {
 
@@ -10,7 +10,7 @@ public class DependentMapper {
         DependentEntity entity = new DependentEntity();
         entity.setId(dependent.getId());
         entity.setName(dependent.getName());
-        entity.setCpf(dependent.getCpf().getValue()); 
+        entity.setCpf(dependent.getCpf().getValue());
         entity.setBirthDate(dependent.getBirthDate());
         return entity;
     }

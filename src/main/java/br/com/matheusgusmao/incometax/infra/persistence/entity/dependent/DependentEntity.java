@@ -1,5 +1,6 @@
-package br.com.matheusgusmao.incometax.infra.persistence.entity.declaration;
+package br.com.matheusgusmao.incometax.infra.persistence.entity.dependent;
 
+import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,9 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dependents")
+@Table(name = "dependents", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"cpf"})
+})
 @Getter
 @Setter
 public class DependentEntity {
