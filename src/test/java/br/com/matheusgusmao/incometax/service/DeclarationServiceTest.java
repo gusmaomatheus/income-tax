@@ -1,5 +1,7 @@
 package br.com.matheusgusmao.incometax.service;
 
+import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
+import br.com.matheusgusmao.incometax.domain.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
