@@ -1,13 +1,11 @@
 package br.com.matheusgusmao.incometax.domain.model.declaration;
 
+import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Getter
@@ -18,6 +16,7 @@ public final class Declaration {
     private final int year;
     private final DeclarationStatus status;
     private final List<Income> incomes;
+    private final List<DeductibleExpense> deductibleExpenses = new ArrayList<>();
 
     private static final Pattern YEAR_REGEX_PATTERN = Pattern.compile("^\\d{4}$");
 
@@ -61,5 +60,29 @@ public final class Declaration {
                 .orElseThrow(() -> new EntityNotFoundException("Income not found with id: " + incomeId));
 
         this.incomes.remove(incomeToRemove);
+    }
+
+    public List<DeductibleExpense> getDeductibleExpenses() {
+        return Collections.unmodifiableList(deductibleExpenses);
+    }
+
+    public void addDeductibleExpense(DeductibleExpense expense) {
+        if (this.status != DeclarationStatus.EDITING) {
+            throw new IllegalStateException("Cannot add expense to a declaration that is not in editing status.");
+        }
+        this.deductibleExpenses.add(expense);
+    }
+
+    public void removeDeductibleExpense(Long expenseId) {
+        if (this.status != DeclarationStatus.EDITING) {
+            throw new IllegalStateException("Cannot remove expense from a declaration that is not in editing status.");
+        }
+
+        DeductibleExpense expenseToRemove = this.deductibleExpenses.stream()
+                .filter(expense -> expense.getId().equals(expenseId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Deductible expense not found with id: " + expenseId));
+
+        this.deductibleExpenses.remove(expenseToRemove);
     }
 }
