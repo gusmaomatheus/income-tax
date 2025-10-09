@@ -68,7 +68,7 @@ public class DeclarationController {
 
         return ResponseEntity.created(location).body(DeclarationResponse.from(newDeclaration));
     }
-    @GetMapping("/history")
+    @GetMapping("/declarations/history")
     public ResponseEntity<?> getHistory(@RequestParam UUID taxpayerId) {
         List<DeclarationHistoryResponse> history = declarationService.getDeclarationHistory(taxpayerId);
         return ResponseEntity.ok(history);
