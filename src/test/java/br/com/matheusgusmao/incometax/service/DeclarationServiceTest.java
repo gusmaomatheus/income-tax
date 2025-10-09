@@ -219,7 +219,7 @@ public class DeclarationServiceTest {
     }
 
     @Test
-    @DisplayName("[Scenario] Should return empty list and message when no declarations found")
+    @DisplayName("[Scenario] Should return empty list when no declarations found")
     void shouldReturnEmptyListWhenNoDeclarationsFound() {
         UUID taxpayerId = UUID.randomUUID();
         when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of());
