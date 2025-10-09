@@ -9,6 +9,7 @@ import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExists
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
+import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationHistoryResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,9 +20,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -188,4 +191,41 @@ public class DeclarationServiceTest {
         verify(declarationRepository, never()).save(any());
     }
 
+    @Test
+    @DisplayName("[Scenario] Should list previous declarations")
+    void shouldListPreviousDeclarations() {
+        UUID taxpayerId = UUID.randomUUID();
+        DeclarationEntity d1 = new DeclarationEntity();
+        d1.setId(1L);
+        d1.setTaxpayerId(taxpayerId);
+        d1.setYear(2022);
+        d1.setStatus(DeclarationStatus.EDITING);
+
+        DeclarationEntity d2 = new DeclarationEntity();
+        d2.setId(2L);
+        d2.setTaxpayerId(taxpayerId);
+        d2.setYear(2023);
+        d2.setStatus(DeclarationStatus.EDITING);
+
+        when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of(d1, d2));
+
+        var result = declarationService.getDeclarationHistory(taxpayerId);
+
+        assertEquals(2, result.size());
+        assertEquals(2022, result.get(0).year());
+        assertEquals("EDITING", result.get(0).status());
+        assertEquals(2023, result.get(1).year());
+        assertEquals("EDITING", result.get(1).status());
+    }
+
+    @Test
+    @DisplayName("[Scenario] Should return empty list when no declarations found")
+    void shouldReturnEmptyListWhenNoDeclarationsFound() {
+        UUID taxpayerId = UUID.randomUUID();
+        when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of());
+
+        var result = declarationService.getDeclarationHistory(taxpayerId);
+
+        assertTrue(result.isEmpty());
+    }
 }
