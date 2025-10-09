@@ -10,7 +10,9 @@ import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRe
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationHistoryResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -90,5 +92,11 @@ public class DeclarationService {
         DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
+
+    public List<DeclarationHistoryResponse> getDeclarationHistory(UUID taxpayerId) {
+        List<DeclarationEntity> declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
+        return declarations.stream()
+                .map(d -> new DeclarationHistoryResponse(d.getYear(), d.getStatus().name()))
+                .toList();
     }
 }
