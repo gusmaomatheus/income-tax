@@ -1,5 +1,7 @@
 package br.com.matheusgusmao.incometax.service;
 
+import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
+import br.com.matheusgusmao.incometax.domain.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
@@ -192,6 +194,81 @@ public class DeclarationServiceTest {
     }
 
     @Test
+    @DisplayName("US4-[Scenario] Should add a deductible health expense successfully")
+    void shouldAddDeductibleHealthExpenseSuccessfully() {
+        final Long declarationId = 1L;
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeductibleExpense expense = new DeductibleExpense("Consulta médica", ExpenseType.HEALTH, new BigDecimal("350.00"));
+        Declaration result = declarationService.addDeductibleExpense(declarationId, expense);
+
+        assertNotNull(result);
+        assertEquals(1, result.getDeductibleExpenses().size());
+        assertThat(result.getDeductibleExpenses()).first().usingRecursiveComparison().isEqualTo(expense);
+        verify(declarationRepository).findById(declarationId);
+        verify(declarationRepository).save(any(DeclarationEntity.class));
+    }
+
+    @Test
+    @DisplayName("US4-[Scenario] Should reject expense with zero or negative value")
+    void shouldRejectExpenseWithZeroValue() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, BigDecimal.ZERO)
+        );
+        assertThrows(IllegalArgumentException.class,
+                () -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, new BigDecimal("-100"))
+        );
+    }
+
+    @Test
+    @DisplayName("US4-[Scenario] Should accept a non-deductible expense")
+    void shouldAcceptNonDeductibleExpense() {
+        final Long declarationId = 1L;
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        DeductibleExpense expense = new DeductibleExpense("Assinatura de revista", ExpenseType.OTHER, new BigDecimal("50.00"));
+        Declaration result = declarationService.addDeductibleExpense(declarationId, expense);
+
+        assertNotNull(result);
+        assertEquals(1, result.getDeductibleExpenses().size());
+        assertEquals(ExpenseType.OTHER, result.getDeductibleExpenses().get(0).getType());
+    }
+
+    @Test
+    @DisplayName("US4-[Scenario] Should remove a deductible expense successfully")
+    void shouldRemoveDeductibleExpenseSuccessfully() {
+        final Long declarationId = 1L;
+        final Long expenseIdToRemove = 20L;
+        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
+        existingDeclarationEntity.setId(declarationId);
+        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING);
+        DeductibleExpense expense = new DeductibleExpense(expenseIdToRemove, "Plano de Saúde", ExpenseType.HEALTH, new BigDecimal("600"));
+        declarationDomain.addDeductibleExpense(expense);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        Declaration updatedDeclaration = declarationService.removeDeductibleExpense(declarationId, expenseIdToRemove);
+
+        assertNotNull(updatedDeclaration);
+        assertTrue(updatedDeclaration.getDeductibleExpenses().isEmpty());
+    }
+
+
+
+
+
+
     @DisplayName("[Scenario] Should list previous declarations")
     void shouldListPreviousDeclarations() {
         UUID taxpayerId = UUID.randomUUID();

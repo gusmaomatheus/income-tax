@@ -11,15 +11,15 @@ import java.util.stream.Collectors;
 public class DeclarationMapper {
 
     private final IncomeMapper incomeMapper;
+    private final DeductibleExpenseMapper deductibleExpenseMapper;
+
 
     @Autowired
-    public DeclarationMapper(IncomeMapper incomeMapper) {
+    public DeclarationMapper(IncomeMapper incomeMapper,  DeductibleExpenseMapper deductibleExpenseMapper) {
         this.incomeMapper = incomeMapper;
+        this.deductibleExpenseMapper = new DeductibleExpenseMapper();
     }
 
-    public DeclarationMapper() {
-        this.incomeMapper = new IncomeMapper();
-    }
 
     public DeclarationEntity toEntity(Declaration domain) {
         if (domain == null) return null;
@@ -36,6 +36,13 @@ public class DeclarationMapper {
                     .collect(Collectors.toList()));
         }
 
+        if (domain.getDeductibleExpenses() != null) {
+            entity.setDeductibleExpenses(domain.getDeductibleExpenses().stream()
+                    .map(deductibleExpenseMapper::toEntity)
+                    .peek(expenseEntity -> expenseEntity.setDeclaration(entity))
+                    .collect(Collectors.toList()));
+        }
+
         return entity;
     }
 
@@ -47,6 +54,11 @@ public class DeclarationMapper {
             entity.getIncomes().stream()
                     .map(incomeMapper::toDomain)
                     .forEach(domain::addIncome);
+        }
+        if (entity.getDeductibleExpenses() != null) {
+            entity.getDeductibleExpenses().stream()
+                    .map(deductibleExpenseMapper::toDomain)
+                    .forEach(domain::addDeductibleExpense);
         }
 
         return domain;

@@ -1,5 +1,6 @@
 package br.com.matheusgusmao.incometax.domain.service;
 
+import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
@@ -65,6 +66,32 @@ public class DeclarationService {
 
         return declarationMapper.toDomain(savedEntity);
     }
+    @Transactional
+    public Declaration addDeductibleExpense(Long declarationId, DeductibleExpense expense) {
+        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.addDeductibleExpense(expense);
+
+        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
+        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
+    }
+
+    @Transactional
+    public Declaration removeDeductibleExpense(Long declarationId, Long expenseId) {
+        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.removeDeductibleExpense(expenseId);
+
+        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
+        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
 
     public List<DeclarationHistoryResponse> getDeclarationHistory(UUID taxpayerId) {
         List<DeclarationEntity> declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
