@@ -5,6 +5,7 @@ import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -14,7 +15,8 @@ public final class Declaration {
     private final Long id;
     private final UUID taxpayerId;
     private final int year;
-    private final DeclarationStatus status;
+    private DeclarationStatus status;
+    private LocalDateTime deliveryDate;
     private final List<Income> incomes;
     private final List<DeductibleExpense> deductibleExpenses = new ArrayList<>();
 
@@ -34,12 +36,13 @@ public final class Declaration {
         this.incomes = new ArrayList<>();
     }
 
-    public Declaration(Long id, UUID taxpayerId, int year, DeclarationStatus status) {
+    public Declaration(Long id, UUID taxpayerId, int year, DeclarationStatus status, LocalDateTime deliveryDate) {
         this.id = id;
         this.taxpayerId = taxpayerId;
         this.year = year;
         this.status = status;
         this.incomes = new ArrayList<>();
+        this.deliveryDate = deliveryDate;
 
     }
     public void addIncome(Income income) {
@@ -84,5 +87,16 @@ public final class Declaration {
                 .orElseThrow(() -> new EntityNotFoundException("Deductible expense not found with id: " + expenseId));
 
         this.deductibleExpenses.remove(expenseToRemove);
+    }
+
+    public void submit() {
+        if (this.status != DeclarationStatus.EDITING) {
+            throw new IllegalStateException("Declaration can only be submitted if it's in editing status.");
+        }
+        if (this.incomes.isEmpty()) {
+            throw new IllegalStateException("Cannot submit a declaration with no incomes. Please report your incomes.");
+        }
+        this.status = DeclarationStatus.DELIVERED;
+        this.deliveryDate = LocalDateTime.now();
     }
 }
