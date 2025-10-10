@@ -1,6 +1,6 @@
 package br.com.matheusgusmao.incometax.domain.service;
 
-import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
+import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
@@ -8,6 +8,7 @@ import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.Decla
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationHistoryResponse;
@@ -92,11 +93,34 @@ public class DeclarationService {
         DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
+    }
 
     public List<DeclarationHistoryResponse> getDeclarationHistory(UUID taxpayerId) {
         List<DeclarationEntity> declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
         return declarations.stream()
                 .map(d -> new DeclarationHistoryResponse(d.getYear(), d.getStatus().name()))
                 .toList();
+    }
+
+    @Transactional
+    public Declaration submitDeclaration(Long declarationId, UUID taxpayerId) {
+        DeclarationEntity declarationEntity = findAndValidateOwnership(declarationId, taxpayerId);
+
+        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.submit();
+
+        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
+        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
+    }
+    private DeclarationEntity findAndValidateOwnership(Long declarationId, UUID taxpayerId) {
+        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        if (!declarationEntity.getTaxpayerId().equals(taxpayerId)) {
+            throw new AccessDeniedException("User is not authorized to modify this declaration.");
+        }
+        return declarationEntity;
     }
 }

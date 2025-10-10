@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -34,6 +35,9 @@ public class DeclarationEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private DeclarationStatus status;
+
+    @Column
+    private LocalDateTime deliveryDate;
 
     @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<IncomeEntity> incomes = new ArrayList<>();

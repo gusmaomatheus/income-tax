@@ -1,6 +1,6 @@
 package br.com.matheusgusmao.incometax.web.dto.expense;
 
-import br.com.matheusgusmao.incometax.domain.expense.ExpenseType;
+import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 
 import java.math.BigDecimal;
 

@@ -1,6 +1,6 @@
 package br.com.matheusgusmao.incometax.infra.persistence.mapper;
 
-import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
+import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.expense.DeductibleExpenseEntity;
 import org.springframework.stereotype.Component;
 
