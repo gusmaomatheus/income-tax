@@ -10,6 +10,8 @@ import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
+import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeductibleExpenseMapper;
+import br.com.matheusgusmao.incometax.infra.persistence.mapper.IncomeMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
 import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationHistoryResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,8 +39,13 @@ public class DeclarationServiceTest {
     @Mock
     private DeclarationRepository declarationRepository;
 
+    @Mock
+    private IncomeMapper incomeMapper;
+    @Mock
+    private DeductibleExpenseMapper deductibleExpenseMapper;
+
     @Spy
-    private DeclarationMapper declarationMapper = new DeclarationMapper();
+    private DeclarationMapper declarationMapper;
 
     @InjectMocks
     private DeclarationService declarationService;
@@ -263,11 +270,6 @@ public class DeclarationServiceTest {
         assertNotNull(updatedDeclaration);
         assertTrue(updatedDeclaration.getDeductibleExpenses().isEmpty());
     }
-
-
-
-
-
 
     @DisplayName("[Scenario] Should list previous declarations")
     void shouldListPreviousDeclarations() {

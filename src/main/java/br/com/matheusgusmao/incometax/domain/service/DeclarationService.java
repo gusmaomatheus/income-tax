@@ -92,6 +92,7 @@ public class DeclarationService {
         DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
+    }
 
     public List<DeclarationHistoryResponse> getDeclarationHistory(UUID taxpayerId) {
         List<DeclarationEntity> declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
