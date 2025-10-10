@@ -306,4 +306,28 @@ public class DeclarationServiceTest {
 
         assertTrue(result.isEmpty());
     }
+    @Test
+    @DisplayName("US7-[Scenario] Should submit declaration successfully when complete")
+    void shouldSubmitDeclarationSuccessfullyWhenComplete() {
+        final Long declarationId = 1L;
+        final UUID taxpayerId = UUID.randomUUID();
+        DeclarationEntity declarationEntity = new DeclarationEntity();
+        declarationEntity.setId(declarationId);
+        declarationEntity.setTaxpayerId(taxpayerId);
+        declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING);
+        declarationDomain.addIncome(new Income("Some Company", IncomeType.SALARY, new BigDecimal("1000")));
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        Declaration result = declarationService.submitDeclaration(declarationId, taxpayerId);
+
+        assertNotNull(result);
+        assertEquals(DeclarationStatus.DELIVERED, result.getStatus());
+        assertNotNull(result.getDeliveryDate());
+        verify(declarationRepository).save(any(DeclarationEntity.class));
+    }
 }
