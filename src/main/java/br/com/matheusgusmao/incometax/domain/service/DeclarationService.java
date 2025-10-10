@@ -8,6 +8,7 @@ import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.Decla
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationHistoryResponse;
@@ -118,7 +119,7 @@ public class DeclarationService {
                 .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
 
         if (!declarationEntity.getTaxpayerId().equals(taxpayerId)) {
-            throw new UnauthorizedAccessException("User is not authorized to modify this declaration.");
+            throw new AccessDeniedException("User is not authorized to modify this declaration.");
         }
         return declarationEntity;
     }
