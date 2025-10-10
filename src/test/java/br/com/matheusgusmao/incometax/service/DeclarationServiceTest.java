@@ -159,7 +159,7 @@ public class DeclarationServiceTest {
         existingDeclarationEntity.setId(declarationId);
         existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
 
-        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING);
+        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING, null);
         Income income = new Income(incomeIdToRemove, "Company A", IncomeType.SALARY, new BigDecimal("50000"));
         declarationDomain.addIncome(income);
 
@@ -186,7 +186,7 @@ public class DeclarationServiceTest {
         existingDeclarationEntity.setId(declarationId);
         existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
 
-        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING);
+        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING, null);
 
         when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
         when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
@@ -256,7 +256,7 @@ public class DeclarationServiceTest {
         DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
         existingDeclarationEntity.setId(declarationId);
         existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
-        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING);
+        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING, null);
         DeductibleExpense expense = new DeductibleExpense(expenseIdToRemove, "Plano de Saúde", ExpenseType.HEALTH, new BigDecimal("600"));
         declarationDomain.addDeductibleExpense(expense);
 
@@ -316,7 +316,7 @@ public class DeclarationServiceTest {
         declarationEntity.setTaxpayerId(taxpayerId);
         declarationEntity.setStatus(DeclarationStatus.EDITING);
 
-        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING);
+        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING, null);
         declarationDomain.addIncome(new Income("Some Company", IncomeType.SALARY, new BigDecimal("1000")));
 
         when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
@@ -341,7 +341,7 @@ public class DeclarationServiceTest {
         declarationEntity.setTaxpayerId(taxpayerId);
         declarationEntity.setStatus(DeclarationStatus.EDITING);
 
-        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING);
+        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING, null);
 
         when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
         when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
