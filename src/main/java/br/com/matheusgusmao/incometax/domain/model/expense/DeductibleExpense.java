@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.domain.expense;
+package br.com.matheusgusmao.incometax.domain.model.expense;
 
 import lombok.Getter;
 

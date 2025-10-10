@@ -1,6 +1,6 @@
 package br.com.matheusgusmao.incometax.infra.persistence.entity.expense;
 
-import br.com.matheusgusmao.incometax.domain.expense.ExpenseType;
+import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package br.com.matheusgusmao.incometax.service;
 
-import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
-import br.com.matheusgusmao.incometax.domain.expense.ExpenseType;
+import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
+import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
@@ -13,7 +13,6 @@ import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeductibleExpenseMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.IncomeMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
-import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationHistoryResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

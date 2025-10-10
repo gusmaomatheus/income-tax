@@ -1,6 +1,6 @@
 package br.com.matheusgusmao.incometax.domain.model.declaration;
 
-import br.com.matheusgusmao.incometax.domain.expense.DeductibleExpense;
+import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
