@@ -29,6 +29,7 @@ public class DeclarationMapper {
         entity.setTaxpayerId(domain.getTaxpayerId());
         entity.setYear(domain.getYear());
         entity.setStatus(domain.getStatus());
+        entity.setDeliveryDate(domain.getDeliveryDate());
 
         if (domain.getIncomes() != null) {
             entity.setIncomes(domain.getIncomes().stream()
@@ -49,7 +50,7 @@ public class DeclarationMapper {
     public Declaration toDomain(DeclarationEntity entity) {
         if (entity == null) return null;
 
-        Declaration domain = new Declaration(entity.getId(), entity.getTaxpayerId(), entity.getYear(), entity.getStatus());
+        Declaration domain = new Declaration(entity.getId(), entity.getTaxpayerId(), entity.getYear(), entity.getStatus(), entity.getDeliveryDate());
         if (entity.getIncomes() != null) {
             entity.getIncomes().stream()
                     .map(incomeMapper::toDomain)
