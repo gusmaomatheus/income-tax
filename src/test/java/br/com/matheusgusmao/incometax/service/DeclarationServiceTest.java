@@ -330,4 +330,26 @@ public class DeclarationServiceTest {
         assertNotNull(result.getDeliveryDate());
         verify(declarationRepository).save(any(DeclarationEntity.class));
     }
+
+    @Test
+    @DisplayName("US7-[Scenario] Should reject submission when declaration has no incomes")
+    void shouldRejectSubmissionWhenDeclarationHasNoIncomes() {
+        final Long declarationId = 1L;
+        final UUID taxpayerId = UUID.randomUUID();
+        DeclarationEntity declarationEntity = new DeclarationEntity();
+        declarationEntity.setId(declarationId);
+        declarationEntity.setTaxpayerId(taxpayerId);
+        declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
+
+        Exception exception = assertThrows(IllegalStateException.class,
+                () -> declarationService.submitDeclaration(declarationId, taxpayerId));
+
+        assertEquals("Cannot submit a declaration with no incomes. Please report your incomes.", exception.getMessage());
+        verify(declarationRepository, never()).save(any());
+    }
 }
