@@ -33,25 +33,21 @@ public class DeclarationMapper {
         entity.setStatus(domain.getStatus());
         entity.setDeliveryDate(domain.getDeliveryDate());
 
-        if (domain.getIncomes() != null) {
-            entity.setIncomes(domain.getIncomes().stream()
-                    .map(income -> incomeMapper.toEntity(income, entity))
-                    .collect(Collectors.toList()));
-        }
+        entity.setIncomes(domain.getIncomes().stream()
+                .map(income -> incomeMapper.toEntity(income, entity))
+                .collect(Collectors.toList()));
 
-        if (domain.getDeductibleExpenses() != null) {
-            entity.setDeductibleExpenses(domain.getDeductibleExpenses().stream()
-                    .map(deductibleExpenseMapper::toEntity)
-                    .peek(expenseEntity -> expenseEntity.setDeclaration(entity))
-                    .collect(Collectors.toList()));
-        }
+        domain.getDeductibleExpenses();
+        entity.setDeductibleExpenses(domain.getDeductibleExpenses().stream()
+                .map(deductibleExpenseMapper::toEntity)
+                .peek(expenseEntity -> expenseEntity.setDeclaration(entity))
+                .collect(Collectors.toList()));
 
-        if (domain.getDependents() != null) {
-            entity.setDependents(domain.getDependents().stream()
-                    .map(dependentMapper::toEntity)
-                    .peek(dependentEntity -> dependentEntity.setDeclaration(entity))
-                    .collect(Collectors.toList()));
-        }
+        domain.getDependents();
+        entity.setDependents(domain.getDependents().stream()
+                .map(dependentMapper::toEntity)
+                .peek(dependentEntity -> dependentEntity.setDeclaration(entity))
+                .collect(Collectors.toList()));
 
         return entity;
     }
@@ -70,7 +66,7 @@ public class DeclarationMapper {
                     .map(deductibleExpenseMapper::toDomain)
                     .forEach(domain::addDeductibleExpense);
         }
-        
+
         if (entity.getDependents() != null) {
             entity.getDependents().stream()
                     .map(dependentMapper::toDomain)
