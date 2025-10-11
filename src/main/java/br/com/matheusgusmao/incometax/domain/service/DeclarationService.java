@@ -33,70 +33,70 @@ public class DeclarationService {
             throw new EntityAlreadyExistsException("A declaration for the given taxpayer and year already exists.");
         }
 
-        Declaration newDeclaration = new Declaration(taxpayerId, year);
+        var newDeclaration = new Declaration(taxpayerId, year);
 
-        DeclarationEntity entityToSave = declarationMapper.toEntity(newDeclaration);
-        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+        var entityToSave = declarationMapper.toEntity(newDeclaration);
+        var savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
     }
     @Transactional
     public Declaration addIncome(Long declarationId, Income income) {
-        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+        var declarationEntity = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
 
-        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        var declarationDomain = declarationMapper.toDomain(declarationEntity);
         declarationDomain.addIncome(income);
 
-        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
-        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+        var entityToSave = declarationMapper.toEntity(declarationDomain);
+        var savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
     }
 
     @Transactional
     public Declaration removeIncome(Long declarationId, Long incomeId) {
-        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+        var declarationEntity = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
 
-        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        var declarationDomain = declarationMapper.toDomain(declarationEntity);
         declarationDomain.removeIncome(incomeId);
 
-        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
-        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+        var entityToSave = declarationMapper.toEntity(declarationDomain);
+        var savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
     }
     @Transactional
     public Declaration addDeductibleExpense(Long declarationId, DeductibleExpense expense) {
-        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+        var declarationEntity = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
 
-        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        var declarationDomain = declarationMapper.toDomain(declarationEntity);
         declarationDomain.addDeductibleExpense(expense);
 
-        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
-        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+        var entityToSave = declarationMapper.toEntity(declarationDomain);
+        var savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
     }
 
     @Transactional
     public Declaration removeDeductibleExpense(Long declarationId, Long expenseId) {
-        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+        var declarationEntity = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
 
-        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        var declarationDomain = declarationMapper.toDomain(declarationEntity);
         declarationDomain.removeDeductibleExpense(expenseId);
 
-        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
-        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+        var entityToSave = declarationMapper.toEntity(declarationDomain);
+        var savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
     }
 
     public List<DeclarationHistoryResponse> getDeclarationHistory(UUID taxpayerId) {
-        List<DeclarationEntity> declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
+        var declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
         return declarations.stream()
                 .map(d -> new DeclarationHistoryResponse(d.getYear(), d.getStatus().name()))
                 .toList();
@@ -104,18 +104,18 @@ public class DeclarationService {
 
     @Transactional
     public Declaration submitDeclaration(Long declarationId, UUID taxpayerId) {
-        DeclarationEntity declarationEntity = findAndValidateOwnership(declarationId, taxpayerId);
+        var declarationEntity = findAndValidateOwnership(declarationId, taxpayerId);
 
-        Declaration declarationDomain = declarationMapper.toDomain(declarationEntity);
+        var declarationDomain = declarationMapper.toDomain(declarationEntity);
         declarationDomain.submit();
 
-        DeclarationEntity entityToSave = declarationMapper.toEntity(declarationDomain);
-        DeclarationEntity savedEntity = declarationRepository.save(entityToSave);
+        var entityToSave = declarationMapper.toEntity(declarationDomain);
+        var savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
     }
     private DeclarationEntity findAndValidateOwnership(Long declarationId, UUID taxpayerId) {
-        DeclarationEntity declarationEntity = declarationRepository.findById(declarationId)
+        var declarationEntity = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
 
         if (!declarationEntity.getTaxpayerId().equals(taxpayerId)) {
