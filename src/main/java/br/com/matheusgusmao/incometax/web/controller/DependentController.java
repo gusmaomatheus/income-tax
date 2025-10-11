@@ -1,8 +1,10 @@
 package br.com.matheusgusmao.incometax.web.controller;
 
-import br.com.matheusgusmao.incometax.domain.service.DependentService;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Cpf;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
+import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
+import br.com.matheusgusmao.incometax.web.dto.declaration.DeclarationResponse;
 import br.com.matheusgusmao.incometax.web.dto.dependent.CreateDependentRequest;
-import br.com.matheusgusmao.incometax.web.dto.dependent.DependentResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,10 +18,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Dependent Management")
 public class DependentController {
 
-    private final DependentService dependentService;
+    private final DeclarationService declarationService;
 
-    public DependentController(DependentService dependentService) {
-        this.dependentService = dependentService;
+    public DependentController(DeclarationService declarationService) {
+        this.declarationService = declarationService;
     }
 
     @Operation(summary = "Add dependent to declaration")
@@ -30,10 +32,13 @@ public class DependentController {
             @ApiResponse(responseCode = "401", description = "Authentication required")
     })
     @PostMapping
-    public ResponseEntity<DependentResponse> addDependent(
+    public ResponseEntity<DeclarationResponse> addDependent(
             @PathVariable Long declarationId,
             @Valid @RequestBody CreateDependentRequest request) {
-        var response = dependentService.addDependent(declarationId, request);
-        return ResponseEntity.status(201).body(response);
+        var cpf = new Cpf(request.cpf());
+        var dependent = new Dependent(request.name(), cpf, request.birthDate());
+        var response = declarationService.addDependent(declarationId, dependent);
+
+        return ResponseEntity.status(201).body(DeclarationResponse.from(response));
     }
 }

@@ -1,12 +1,6 @@
 package br.com.matheusgusmao.incometax.functional;
 
-import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
-import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
-import br.com.matheusgusmao.incometax.domain.model.income.Income;
-import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
-import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
-import br.com.matheusgusmao.incometax.infra.persistence.entity.user.UserEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.UserRepository;
 import br.com.matheusgusmao.incometax.web.dto.auth.AuthRequest;
@@ -27,16 +21,15 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureWebMvc
@@ -75,7 +68,7 @@ class DeclarationFunctionalTest {
         // Register and authenticate a test user
         var registerRequest = new RegisterUserRequest("João", "Silva", "joao@test.com", "password123");
         var registerResponse = performRegister(registerRequest);
-        userId = registerResponse.getId();
+        userId = registerResponse.id();
 
         var authRequest = new AuthRequest("joao@test.com", "password123");
         var authResponse = performAuth(authRequest);
@@ -115,7 +108,7 @@ class DeclarationFunctionalTest {
         void shouldRejectDuplicateDeclaration() throws Exception {
             // Given
             var createRequest = new CreateDeclarationRequest(2025);
-            
+
             // Create first declaration
             mockMvc.perform(post("/declarations")
                             .header("Authorization", "Bearer " + authToken)
@@ -158,7 +151,7 @@ class DeclarationFunctionalTest {
             // Then
             var declaration = declarationService.findById(declarationId);
             assertThat(declaration.getIncomes()).hasSize(1);
-            assertThat(declaration.getIncomes().get(0).getPayingSource()).isEqualTo("Company ABC");
+            assertThat(declaration.getIncomes().getFirst().getPayingSource()).isEqualTo("Company ABC");
         }
 
         @Test
@@ -188,7 +181,7 @@ class DeclarationFunctionalTest {
             // Then
             var declaration = declarationService.findById(declarationId);
             assertThat(declaration.getDeductibleExpenses()).hasSize(1);
-            assertThat(declaration.getDeductibleExpenses().get(0).getDescription()).isEqualTo("Plano de saúde");
+            assertThat(declaration.getDeductibleExpenses().getFirst().getDescription()).isEqualTo("Plano de saúde");
         }
 
         @Test
@@ -216,7 +209,7 @@ class DeclarationFunctionalTest {
             // Then
             var declaration = declarationService.findById(declarationId);
             assertThat(declaration.getDependents()).hasSize(1);
-            assertThat(declaration.getDependents().get(0).getName()).isEqualTo("Maria Silva");
+            assertThat(declaration.getDependents().getFirst().getName()).isEqualTo("Maria Silva");
         }
 
         @Test
@@ -224,7 +217,7 @@ class DeclarationFunctionalTest {
         void shouldSubmitDeclarationSuccessfully() throws Exception {
             // Given
             var declarationId = createDeclaration();
-            
+
             // Add income (required for submission)
             var incomeRequest = """
                     {
@@ -233,7 +226,7 @@ class DeclarationFunctionalTest {
                         "value": 50000.00
                     }
                     """;
-            
+
             mockMvc.perform(post("/declarations/{id}/incomes", declarationId)
                             .header("Authorization", "Bearer " + authToken)
                             .contentType(MediaType.APPLICATION_JSON)

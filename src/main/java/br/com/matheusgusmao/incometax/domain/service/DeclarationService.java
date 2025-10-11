@@ -1,5 +1,6 @@
 package br.com.matheusgusmao.incometax.domain.service;
 
+import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
 import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
@@ -89,6 +90,34 @@ public class DeclarationService {
 
         var declarationDomain = declarationMapper.toDomain(declarationEntity);
         declarationDomain.removeDeductibleExpense(expenseId);
+
+        var entityToSave = declarationMapper.toEntity(declarationDomain);
+        var savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
+    }
+
+    @Transactional
+    public Declaration addDependent(Long declarationId, Dependent dependent) {
+        var declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        var declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.addDependent(dependent);
+
+        var entityToSave = declarationMapper.toEntity(declarationDomain);
+        var savedEntity = declarationRepository.save(entityToSave);
+
+        return declarationMapper.toDomain(savedEntity);
+    }
+
+    @Transactional
+    public Declaration removeDependent(Long declarationId, Long dependentId) {
+        var declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+
+        var declarationDomain = declarationMapper.toDomain(declarationEntity);
+        declarationDomain.removeDependent(dependentId);
 
         var entityToSave = declarationMapper.toEntity(declarationDomain);
         var savedEntity = declarationRepository.save(entityToSave);
