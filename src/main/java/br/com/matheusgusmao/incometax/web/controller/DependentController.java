@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,7 @@ public class DependentController {
     @PostMapping
     public ResponseEntity<DependentResponse> addDependent(
             @PathVariable Long declarationId,
-            @RequestBody CreateDependentRequest request) {
+            @Valid @RequestBody CreateDependentRequest request) {
         var response = dependentService.addDependent(declarationId, request);
         return ResponseEntity.status(201).body(response);
     }
