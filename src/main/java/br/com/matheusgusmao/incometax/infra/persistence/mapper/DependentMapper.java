@@ -3,7 +3,9 @@ package br.com.matheusgusmao.incometax.infra.persistence.mapper;
 import br.com.matheusgusmao.incometax.domain.model.dependent.Cpf;
 import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DependentEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DependentMapper {
 
     public DependentEntity toEntity(Dependent dependent) {

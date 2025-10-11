@@ -19,32 +19,33 @@ public class DependentService {
 
     private final DependentRepository dependentRepository;
     private final DeclarationRepository declarationRepository;
-    private final DependentMapper dependentMapper = new DependentMapper();
+    private final DependentMapper dependentMapper;
 
-    public DependentService(DependentRepository dependentRepository, DeclarationRepository declarationRepository) {
+    public DependentService(DependentRepository dependentRepository, DeclarationRepository declarationRepository, DependentMapper dependentMapper) {
         this.dependentRepository = dependentRepository;
         this.declarationRepository = declarationRepository;
+        this.dependentMapper = dependentMapper;
     }
 
     @Transactional
     public DependentResponse addDependent(Long declarationId, CreateDependentRequest request) {
-        Cpf cpf = new Cpf(request.cpf());
+        var cpf = new Cpf(request.cpf());
 
-        Optional<DependentEntity> existing = dependentRepository.findByCpf(cpf.getValue());
+        var existing = dependentRepository.findByCpf(cpf.getValue());
         if (existing.isPresent()) {
             throw new IllegalArgumentException("Dependente já cadastrado");
         }
 
-        DeclarationEntity declaration = declarationRepository.findById(declarationId)
+        var declaration = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new IllegalArgumentException("Declaração não encontrada"));
 
-        Dependent dependent = new Dependent(request.name(), cpf, request.birthDate());
-        DependentEntity dependentEntity = dependentMapper.toEntity(dependent);
+        var dependent = new Dependent(request.name(), cpf, request.birthDate());
+        var dependentEntity = dependentMapper.toEntity(dependent);
         dependentEntity.setDeclaration(declaration);
 
         dependentEntity = dependentRepository.save(dependentEntity);
 
-        Dependent savedDependent = dependentMapper.toDomain(dependentEntity);
+        var savedDependent = dependentMapper.toDomain(dependentEntity);
 
         return DependentResponse.from(savedDependent);
     }

@@ -12,12 +12,14 @@ public class DeclarationMapper {
 
     private final IncomeMapper incomeMapper;
     private final DeductibleExpenseMapper deductibleExpenseMapper;
+    private final DependentMapper dependentMapper;
 
 
     @Autowired
-    public DeclarationMapper(IncomeMapper incomeMapper,  DeductibleExpenseMapper deductibleExpenseMapper) {
+    public DeclarationMapper(IncomeMapper incomeMapper, DeductibleExpenseMapper deductibleExpenseMapper, DependentMapper dependentMapper) {
         this.incomeMapper = incomeMapper;
-        this.deductibleExpenseMapper = new DeductibleExpenseMapper();
+        this.deductibleExpenseMapper = deductibleExpenseMapper;
+        this.dependentMapper = dependentMapper;
     }
 
 
@@ -44,6 +46,13 @@ public class DeclarationMapper {
                     .collect(Collectors.toList()));
         }
 
+        if (domain.getDependents() != null) {
+            entity.setDependents(domain.getDependents().stream()
+                    .map(dependentMapper::toEntity)
+                    .peek(dependentEntity -> dependentEntity.setDeclaration(entity))
+                    .collect(Collectors.toList()));
+        }
+
         return entity;
     }
 
@@ -60,6 +69,12 @@ public class DeclarationMapper {
             entity.getDeductibleExpenses().stream()
                     .map(deductibleExpenseMapper::toDomain)
                     .forEach(domain::addDeductibleExpense);
+        }
+        
+        if (entity.getDependents() != null) {
+            entity.getDependents().stream()
+                    .map(dependentMapper::toDomain)
+                    .forEach(domain::addDependent);
         }
 
         return domain;

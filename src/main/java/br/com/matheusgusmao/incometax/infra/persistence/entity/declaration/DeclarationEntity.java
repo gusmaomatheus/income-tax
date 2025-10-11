@@ -3,6 +3,7 @@ package br.com.matheusgusmao.incometax.infra.persistence.entity.declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.expense.DeductibleExpenseEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.income.IncomeEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DependentEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,4 +45,7 @@ public class DeclarationEntity {
 
     @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<DeductibleExpenseEntity> deductibleExpenses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "declaration", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<DependentEntity> dependents = new ArrayList<>();
 }
