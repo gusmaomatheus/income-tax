@@ -34,12 +34,12 @@ public class DeclarationService {
         }
 
         var newDeclaration = new Declaration(taxpayerId, year);
-
         var entityToSave = declarationMapper.toEntity(newDeclaration);
         var savedEntity = declarationRepository.save(entityToSave);
 
         return declarationMapper.toDomain(savedEntity);
     }
+
     @Transactional
     public Declaration addIncome(Long declarationId, Income income) {
         var declarationEntity = declarationRepository.findById(declarationId)
@@ -67,6 +67,7 @@ public class DeclarationService {
 
         return declarationMapper.toDomain(savedEntity);
     }
+
     @Transactional
     public Declaration addDeductibleExpense(Long declarationId, DeductibleExpense expense) {
         var declarationEntity = declarationRepository.findById(declarationId)
@@ -95,13 +96,6 @@ public class DeclarationService {
         return declarationMapper.toDomain(savedEntity);
     }
 
-    public List<DeclarationHistoryResponse> getDeclarationHistory(UUID taxpayerId) {
-        var declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
-        return declarations.stream()
-                .map(d -> new DeclarationHistoryResponse(d.getYear(), d.getStatus().name()))
-                .toList();
-    }
-
     @Transactional
     public Declaration submitDeclaration(Long declarationId, UUID taxpayerId) {
         var declarationEntity = findAndValidateOwnership(declarationId, taxpayerId);
@@ -114,6 +108,20 @@ public class DeclarationService {
 
         return declarationMapper.toDomain(savedEntity);
     }
+
+    public Declaration findById(Long declarationId) {
+        var declarationEntity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
+        return declarationMapper.toDomain(declarationEntity);
+    }
+
+    public List<DeclarationHistoryResponse> getDeclarationHistory(UUID taxpayerId) {
+        var declarations = declarationRepository.findAllByTaxpayerId(taxpayerId);
+        return declarations.stream()
+                .map(d -> new DeclarationHistoryResponse(d.getYear(), d.getStatus().name()))
+                .toList();
+    }
+
     private DeclarationEntity findAndValidateOwnership(Long declarationId, UUID taxpayerId) {
         var declarationEntity = declarationRepository.findById(declarationId)
                 .orElseThrow(() -> new EntityNotFoundException("Declaration not found with id: " + declarationId));
