@@ -1,6 +1,5 @@
 package br.com.matheusgusmao.incometax.web.dto.expense;
 
-import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -17,19 +16,3 @@ public record CreateExpenseRequest(
         @DecimalMin(value = "0.01", message = "Value must be greater than zero")
         BigDecimal value
 ) {}
-
-public record ExpenseResponse(
-        Long id,
-        String description,
-        ExpenseType type,
-        BigDecimal value
-) {
-    public static ExpenseResponse from(DeductibleExpense expense) {
-        return new ExpenseResponse(
-                expense.getId(),
-                expense.getDescription(),
-                expense.getType(),
-                expense.getValue()
-        );
-    }
-}

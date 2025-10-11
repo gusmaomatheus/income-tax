@@ -1,6 +1,5 @@
 package br.com.matheusgusmao.incometax.web.dto.income;
 
-import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -17,19 +16,3 @@ public record CreateIncomeRequest(
         @DecimalMin(value = "0.01", message = "Value must be greater than zero")
         BigDecimal value
 ) {}
-
-public record IncomeResponse(
-        Long id,
-        String payingSource,
-        IncomeType type,
-        BigDecimal value
-) {
-    public static IncomeResponse from(Income income) {
-        return new IncomeResponse(
-                income.getId(),
-                income.getPayingSource(),
-                income.getType(),
-                income.getValue()
-        );
-    }
-}
