@@ -123,4 +123,16 @@ public class DeclarationService {
         }
         return declarationEntity;
     }
+    public Declaration submitDeclaration(Long declarationId) {
+        DeclarationEntity entity = declarationRepository.findById(declarationId)
+                .orElseThrow(() -> new EntityNotFoundException("Declaração não encontrada"));
+        Declaration declaration = declarationMapper.toDomain(entity);
+
+        if (declaration.getIncomes() == null || declaration.getIncomes().isEmpty()) {
+            throw new IllegalArgumentException("Informe seus rendimentos");
+        }
+
+        declarationRepository.save(entity);
+        return declaration;
+    }
 }
