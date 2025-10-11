@@ -352,4 +352,42 @@ public class DeclarationServiceTest {
         assertEquals("Cannot submit a declaration with no incomes. Please report your incomes.", exception.getMessage());
         verify(declarationRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("[Scenario] Should reject submission without incomes")
+    void shouldRejectSubmissionWithoutIncomes() {
+        Long declarationId = 1L;
+        DeclarationEntity declarationEntity = new DeclarationEntity();
+        declarationEntity.setId(declarationId);
+        declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+        when(declarationMapper.toDomain(any(DeclarationEntity.class)))
+            .thenReturn(new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING));
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () ->
+            declarationService.submitDeclaration(declarationId)
+        );
+        assertEquals("Informe seus rendimentos", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("[Scenario] Should allow submission with incomes and deductions")
+    void shouldAllowSubmissionWithIncomesAndDeductions() {
+        Long declarationId = 1L;
+        DeclarationEntity declarationEntity = new DeclarationEntity();
+        declarationEntity.setId(declarationId);
+        declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING);
+        declarationDomain.addIncome(new Income("Empresa X", IncomeType.SALARY, new BigDecimal("1000.00")));
+
+        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
+        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+        Declaration result = declarationService.submitDeclaration(declarationId);
+
+        assertNotNull(result);
+    }
 }

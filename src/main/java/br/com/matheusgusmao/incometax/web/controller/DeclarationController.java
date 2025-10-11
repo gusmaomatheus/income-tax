@@ -73,4 +73,9 @@ public class DeclarationController {
         List<DeclarationHistoryResponse> history = declarationService.getDeclarationHistory(taxpayerId);
         return ResponseEntity.ok(history);
     }
+    @PutMapping("/{id}/submit")
+    public ResponseEntity<DeclarationResponse> submitDeclaration(@PathVariable Long id) {
+        Declaration declaration = declarationService.submitDeclaration(id);
+        return ResponseEntity.ok(DeclarationResponse.from(declaration));
+    }
 }
