@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +59,7 @@ public class DeclarationController {
             )
     })
     @PostMapping
-    public ResponseEntity<DeclarationResponse> create(@RequestBody CreateDeclarationRequest request, @AuthenticationPrincipal UserEntity authenticatedUser) {
+    public ResponseEntity<DeclarationResponse> create(@Valid @RequestBody CreateDeclarationRequest request, @AuthenticationPrincipal UserEntity authenticatedUser) {
 
         var taxpayerId = authenticatedUser.getId();
 
