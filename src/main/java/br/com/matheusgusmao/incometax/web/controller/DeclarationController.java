@@ -60,17 +60,57 @@ public class DeclarationController {
     @PostMapping
     public ResponseEntity<DeclarationResponse> create(@RequestBody CreateDeclarationRequest request, @AuthenticationPrincipal UserEntity authenticatedUser) {
 
-        UUID taxpayerId = authenticatedUser.getId();
+        var taxpayerId = authenticatedUser.getId();
 
-        Declaration newDeclaration = declarationService.createNewDeclaration(taxpayerId, request.year());
+        var newDeclaration = declarationService.createNewDeclaration(taxpayerId, request.year());
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newDeclaration.getId()).toUri();
+        var location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(newDeclaration.getId()).toUri();
 
         return ResponseEntity.created(location).body(DeclarationResponse.from(newDeclaration));
     }
-    @GetMapping("/declarations/history")
-    public ResponseEntity<?> getHistory(@RequestParam UUID taxpayerId) {
-        List<DeclarationHistoryResponse> history = declarationService.getDeclarationHistory(taxpayerId);
+    @Operation(summary = "Get declaration by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Declaration found"),
+            @ApiResponse(responseCode = "404", description = "Declaration not found"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<DeclarationResponse> getDeclaration(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserEntity authenticatedUser) {
+        
+        var declaration = declarationService.findById(id);
+        return ResponseEntity.ok(DeclarationResponse.from(declaration));
+    }
+
+    @Operation(summary = "Submit declaration")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Declaration submitted successfully"),
+            @ApiResponse(responseCode = "400", description = "Cannot submit declaration without incomes"),
+            @ApiResponse(responseCode = "404", description = "Declaration not found"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
+    })
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<DeclarationResponse> submitDeclaration(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserEntity authenticatedUser) {
+        
+        var taxpayerId = authenticatedUser.getId();
+        var submittedDeclaration = declarationService.submitDeclaration(id, taxpayerId);
+        return ResponseEntity.ok(DeclarationResponse.from(submittedDeclaration));
+    }
+
+    @Operation(summary = "Get declaration history")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "History retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
+    })
+    @GetMapping("/history")
+    public ResponseEntity<List<DeclarationHistoryResponse>> getHistory(
+            @AuthenticationPrincipal UserEntity authenticatedUser) {
+        
+        var taxpayerId = authenticatedUser.getId();
+        var history = declarationService.getDeclarationHistory(taxpayerId);
         return ResponseEntity.ok(history);
     }
 }
