@@ -133,9 +133,9 @@ public class DeclarationService {
         declarationDomain.submit();
 
         var entityToSave = declarationMapper.toEntity(declarationDomain);
-        var savedEntity = declarationRepository.save(entityToSave);
+        declarationRepository.save(entityToSave);
 
-        return declarationMapper.toDomain(savedEntity);
+        return declarationDomain;
     }
 
     public Declaration findById(Long declarationId) {

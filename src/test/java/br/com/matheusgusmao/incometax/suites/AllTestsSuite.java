@@ -6,9 +6,6 @@ import org.junit.platform.suite.api.SuiteDisplayName;
 
 @Suite
 @SuiteDisplayName("All Tests Suite")
-@SelectPackages({
-    "br.com.matheusgusmao.incometax.service",
-    "br.com.matheusgusmao.incometax.functional"
-})
+@SelectPackages("br.com.matheusgusmao")
 public class AllTestsSuite {
 }

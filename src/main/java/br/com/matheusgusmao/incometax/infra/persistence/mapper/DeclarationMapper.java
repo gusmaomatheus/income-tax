@@ -10,10 +10,11 @@ import java.util.stream.Collectors;
 @Component
 public class DeclarationMapper {
 
-    private final IncomeMapper incomeMapper;
-    private final DeductibleExpenseMapper deductibleExpenseMapper;
-    private final DependentMapper dependentMapper;
+    private IncomeMapper incomeMapper;
+    private DeductibleExpenseMapper deductibleExpenseMapper;
+    private DependentMapper dependentMapper;
 
+    public DeclarationMapper() {}
 
     @Autowired
     public DeclarationMapper(IncomeMapper incomeMapper, DeductibleExpenseMapper deductibleExpenseMapper, DependentMapper dependentMapper) {
@@ -26,48 +27,46 @@ public class DeclarationMapper {
     public DeclarationEntity toEntity(Declaration domain) {
         if (domain == null) return null;
 
-        DeclarationEntity entity = new DeclarationEntity();
-        entity.setId(domain.getId());
-        entity.setTaxpayerId(domain.getTaxpayerId());
-        entity.setYear(domain.getYear());
-        entity.setStatus(domain.getStatus());
-        entity.setDeliveryDate(domain.getDeliveryDate());
+        DeclarationEntity declarationEntity = new DeclarationEntity();
+        declarationEntity.setId(domain.getId());
+        declarationEntity.setTaxpayerId(domain.getTaxpayerId());
+        declarationEntity.setYear(domain.getYear());
+        declarationEntity.setStatus(domain.getStatus());
+        declarationEntity.setDeliveryDate(domain.getDeliveryDate());
 
-        entity.setIncomes(domain.getIncomes().stream()
-                .map(income -> incomeMapper.toEntity(income, entity))
+        declarationEntity.setIncomes(domain.getIncomes().stream()
+                .map(income -> incomeMapper.toEntity(income, declarationEntity))
                 .collect(Collectors.toList()));
 
-        domain.getDeductibleExpenses();
-        entity.setDeductibleExpenses(domain.getDeductibleExpenses().stream()
-                .map(deductibleExpenseMapper::toEntity)
-                .peek(expenseEntity -> expenseEntity.setDeclaration(entity))
+        declarationEntity.setDeductibleExpenses(domain.getDeductibleExpenses().stream()
+                .map(deductibleExpense ->  deductibleExpenseMapper.toEntity(deductibleExpense, declarationEntity))
                 .collect(Collectors.toList()));
 
-        domain.getDependents();
-        entity.setDependents(domain.getDependents().stream()
-                .map(dependentMapper::toEntity)
-                .peek(dependentEntity -> dependentEntity.setDeclaration(entity))
+        declarationEntity.setDependents(domain.getDependents().stream()
+                .map(dependent -> dependentMapper.toEntity(dependent, declarationEntity))
                 .collect(Collectors.toList()));
 
-        return entity;
+        return declarationEntity;
     }
 
     public Declaration toDomain(DeclarationEntity entity) {
         if (entity == null) return null;
 
         Declaration domain = new Declaration(entity.getId(), entity.getTaxpayerId(), entity.getYear(), entity.getStatus(), entity.getDeliveryDate());
-        if (entity.getIncomes() != null) {
+
+        if (!entity.getIncomes().isEmpty()) {
             entity.getIncomes().stream()
                     .map(incomeMapper::toDomain)
                     .forEach(domain::addIncome);
         }
-        if (entity.getDeductibleExpenses() != null) {
+
+        if (!entity.getDeductibleExpenses().isEmpty()) {
             entity.getDeductibleExpenses().stream()
                     .map(deductibleExpenseMapper::toDomain)
                     .forEach(domain::addDeductibleExpense);
         }
 
-        if (entity.getDependents() != null) {
+        if (!entity.getDependents().isEmpty()) {
             entity.getDependents().stream()
                     .map(dependentMapper::toDomain)
                     .forEach(domain::addDependent);
