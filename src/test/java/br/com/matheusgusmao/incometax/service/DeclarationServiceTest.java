@@ -1,356 +1,497 @@
 package br.com.matheusgusmao.incometax.service;
 
-import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
-import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Cpf;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
+import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
+import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DependentEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.expense.DeductibleExpenseEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.income.IncomeEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeductibleExpenseMapper;
+import br.com.matheusgusmao.incometax.infra.persistence.mapper.DependentMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.IncomeMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class DeclarationServiceTest {
+@DisplayName("DeclarationService")
+class DeclarationServiceTest {
 
     @Mock
     private DeclarationRepository declarationRepository;
-
     @Mock
     private IncomeMapper incomeMapper;
     @Mock
     private DeductibleExpenseMapper deductibleExpenseMapper;
-
-    @Spy
-    private DeclarationMapper declarationMapper;
-
+    @Mock
+    private DependentMapper dependentMapper;
     @InjectMocks
     private DeclarationService declarationService;
 
-    @Test
-    @DisplayName("US1-[Scenario] Should create new declaration successfully")
-    void shouldCreateNewDeclarationSuccessfullyWhenNonExistent() {
-        final UUID taxpayerId = UUID.randomUUID();
-        final int year = 2025;
-
-        when(declarationRepository.existsByTaxpayerIdAndYear(taxpayerId, year)).thenReturn(false);
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(invocation -> {
-            DeclarationEntity entity = invocation.getArgument(0);
-            entity.setId(1L);
-            return entity;
-        });
-
-        Declaration result = declarationService.createNewDeclaration(taxpayerId, year);
-
-        assertNotNull(result);
-        assertNotNull(result.getId());
-        assertEquals(1L, result.getId());
-        verify(declarationRepository).existsByTaxpayerIdAndYear(taxpayerId, year);
-        verify(declarationRepository).save(any(DeclarationEntity.class));
+    @BeforeEach
+    void setUp() {
+        DeclarationMapper declarationMapper = new DeclarationMapper();
+        ReflectionTestUtils.setField(declarationMapper, "dependentMapper", dependentMapper);
+        ReflectionTestUtils.setField(declarationMapper, "incomeMapper", incomeMapper);
+        ReflectionTestUtils.setField(declarationMapper, "deductibleExpenseMapper", deductibleExpenseMapper);
+        ReflectionTestUtils.setField(declarationService, "declarationMapper", declarationMapper);
     }
 
-    @Test
-    @DisplayName("US1-[Scenario] Should prevent duplicate declaration in the same year")
-    void shouldThrowExceptionWhenDeclarationForSameYearAlreadyExists() {
-        final UUID taxpayerId = UUID.randomUUID();
-        final int year = 2025;
-        when(declarationRepository.existsByTaxpayerIdAndYear(taxpayerId, year)).thenReturn(true);
+    @Nested
+    @DisplayName("Given a taxpayer wants to create a new declaration")
+    @Tag("Unit")
+    class CreateDeclarationTests {
 
-        assertThrows(EntityAlreadyExistsException.class,
-                () -> declarationService.createNewDeclaration(taxpayerId, year)
-        );
+        private UUID taxpayerId;
+        private int year;
 
-        verify(declarationRepository, never()).save(any(DeclarationEntity.class));
+        @BeforeEach
+        void setUp() {
+            taxpayerId = UUID.randomUUID();
+            year = 2025;
+        }
+
+        @Test
+        @DisplayName("When taxpayer creates declaration for a new year Then declaration should be created successfully")
+        void shouldCreateNewDeclarationSuccessfullyWhenNonExistent() {
+            when(declarationRepository.existsByTaxpayerIdAndYear(taxpayerId, year)).thenReturn(false);
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(invocation -> {
+                DeclarationEntity entityToSave = invocation.getArgument(0);
+                entityToSave.setId(1L);
+                return entityToSave;
+            });
+
+            var result = declarationService.createNewDeclaration(taxpayerId, year);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getId()).isNotNull();
+            assertThat(result.getId()).isEqualTo(1L);
+            verify(declarationRepository).existsByTaxpayerIdAndYear(taxpayerId, year);
+            verify(declarationRepository).save(any(DeclarationEntity.class));
+        }
+
+        @Test
+        @DisplayName("When taxpayer tries to create declaration for existing year Then exception should be thrown")
+        void shouldThrowExceptionWhenDeclarationForSameYearAlreadyExists() {
+            when(declarationRepository.existsByTaxpayerIdAndYear(taxpayerId, year)).thenReturn(true);
+
+            assertThatThrownBy(() -> declarationService.createNewDeclaration(taxpayerId, year))
+                    .isInstanceOf(EntityAlreadyExistsException.class);
+
+            verify(declarationRepository, never()).save(any(DeclarationEntity.class));
+        }
     }
 
-    @Test
-    @DisplayName("US2-[Scenario] Should add a valid income to a declaration")
-    void shouldAddValidIncomeToDeclaration() {
-        final Long declarationId = 1L;
-        final Income newIncome = new Income("Company A", IncomeType.SALARY, new BigDecimal("50000.00"));
+    @Nested
+    @DisplayName("Given a taxpayer wants to manage incomes in their declaration")
+    @Tag("Unit")
+    class IncomeManagementTests {
 
-        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
-        existingDeclarationEntity.setId(declarationId);
-        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
-        existingDeclarationEntity.setTaxpayerId(UUID.randomUUID());
-        existingDeclarationEntity.setYear(2025);
+        private Long declarationId;
+        private DeclarationEntity existingDeclarationEntity;
 
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+        @BeforeEach
+        void setUp() {
+            declarationId = 1L;
+            UUID taxpayerId = UUID.randomUUID();
 
-        Declaration updatedDeclaration = declarationService.addIncome(declarationId, newIncome);
+            existingDeclarationEntity = new DeclarationEntity();
+            existingDeclarationEntity.setId(declarationId);
+            existingDeclarationEntity.setTaxpayerId(taxpayerId);
+            existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+            existingDeclarationEntity.setYear(2025);
+        }
 
-        assertNotNull(updatedDeclaration);
-        assertEquals(1, updatedDeclaration.getIncomes().size());
-        assertEquals("Company A", updatedDeclaration.getIncomes().get(0).getPayingSource());
-        verify(declarationRepository).findById(declarationId);
-        verify(declarationRepository).save(any(DeclarationEntity.class));
+        @Test
+        @DisplayName("When taxpayer adds valid income Then income should be added successfully")
+        void shouldAddValidIncomeToDeclaration() {
+            var newIncome = new Income("Company A", IncomeType.SALARY, new BigDecimal("50000.00"));
+
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+            when(incomeMapper.toEntity(any(Income.class), any(DeclarationEntity.class))).thenAnswer(i -> {
+                Income domain = i.getArgument(0);
+                IncomeEntity entity = new IncomeEntity();
+                entity.setPayingSource(domain.getPayingSource());
+                entity.setType(domain.getType());
+                entity.setValue(domain.getValue());
+                return entity;
+            });
+
+            var updatedDeclaration = declarationService.addIncome(declarationId, newIncome);
+
+            assertThat(updatedDeclaration).isNotNull();
+            assertThat(updatedDeclaration.getIncomes()).hasSize(1);
+
+            verify(declarationRepository).findById(declarationId);
+            verify(declarationRepository).save(any(DeclarationEntity.class));
+        }
+
+        @Test
+        @DisplayName("When taxpayer tries to add income with negative value Then exception should be thrown")
+        void shouldPreventAddingIncomeWithNegativeValue() {
+            assertThatThrownBy(() -> new Income("Company B", IncomeType.OTHER, new BigDecimal("-100.00")))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Income value cannot be negative.");
+
+            verify(declarationRepository, never()).findById(any());
+            verify(declarationRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("When taxpayer adds multiple incomes from same source Then all incomes should be added")
+        void shouldAllowDifferentIncomesFromSameSource() {
+            var income1 = new Income("Company C", IncomeType.SALARY, new BigDecimal("60000.00"));
+            var income2 = new Income("Company C", IncomeType.VACATION, new BigDecimal("5000.00"));
+
+            var incomeEntity1 = new IncomeEntity();
+            incomeEntity1.setPayingSource(income1.getPayingSource());
+            incomeEntity1.setType(income1.getType());
+            incomeEntity1.setValue(income1.getValue());
+
+            var declarationEntityAfterFirstSave = new DeclarationEntity();
+            declarationEntityAfterFirstSave.setId(declarationId);
+            declarationEntityAfterFirstSave.setTaxpayerId(existingDeclarationEntity.getTaxpayerId());
+            declarationEntityAfterFirstSave.setStatus(DeclarationStatus.EDITING);
+            declarationEntityAfterFirstSave.setYear(2025);
+            declarationEntityAfterFirstSave.setIncomes(List.of(incomeEntity1));
+
+            when(declarationRepository.findById(declarationId))
+                    .thenReturn(Optional.of(existingDeclarationEntity))
+                    .thenReturn(Optional.of(declarationEntityAfterFirstSave));
+
+            when(incomeMapper.toDomain(any(IncomeEntity.class))).thenAnswer(i -> {
+                IncomeEntity entity = i.getArgument(0);
+                return new Income(entity.getId(), entity.getPayingSource(), entity.getType(), entity.getValue());
+            });
+            when(incomeMapper.toEntity(any(Income.class), any(DeclarationEntity.class))).thenAnswer(i -> {
+                Income domain = i.getArgument(0);
+                IncomeEntity entity = new IncomeEntity();
+                entity.setPayingSource(domain.getPayingSource());
+                entity.setType(domain.getType());
+                entity.setValue(domain.getValue());
+                return entity;
+            });
+
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+            declarationService.addIncome(declarationId, income1);
+            var updatedDeclaration = declarationService.addIncome(declarationId, income2);
+
+            assertThat(updatedDeclaration).isNotNull();
+            assertThat(updatedDeclaration.getIncomes()).hasSize(2);
+            verify(declarationRepository, times(2)).findById(declarationId);
+            verify(declarationRepository, times(2)).save(any(DeclarationEntity.class));
+        }
+
+        @Test
+        @DisplayName("When taxpayer removes existing income Then income should be removed successfully")
+        void shouldRemoveIncomeSuccessfully() {
+            var incomeIdToRemove = 10L;
+
+            var incomeEntity = new IncomeEntity();
+            incomeEntity.setId(incomeIdToRemove);
+            existingDeclarationEntity.setIncomes(List.of(incomeEntity));
+
+            var incomeDomain = new Income(incomeIdToRemove, "Company A", IncomeType.SALARY, new BigDecimal("50000"));
+            when(incomeMapper.toDomain(any(IncomeEntity.class))).thenReturn(incomeDomain);
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+            var updatedDeclaration = declarationService.removeIncome(declarationId, incomeIdToRemove);
+
+            assertThat(updatedDeclaration).isNotNull();
+            assertThat(updatedDeclaration.getIncomes()).isEmpty();
+            verify(declarationRepository).save(any(DeclarationEntity.class));
+        }
+
+        @Test
+        @DisplayName("When taxpayer tries to remove non-existent income Then exception should be thrown")
+        void shouldThrowExceptionWhenRemovingNonExistentIncome() {
+            var nonExistentIncomeId = 99L;
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+
+            assertThatThrownBy(() -> declarationService.removeIncome(declarationId, nonExistentIncomeId))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("Income not found with id: " + nonExistentIncomeId);
+
+            verify(declarationRepository, never()).save(any(DeclarationEntity.class));
+        }
     }
 
-    @Test
-    @DisplayName("US2-[Scenario] Should prevent adding income with a negative value")
-    void shouldPreventAddingIncomeWithNegativeValue() {
-        final Long declarationId = 1L;
+    @Nested
+    @DisplayName("Given a taxpayer wants to manage deductible expenses in their declaration")
+    @Tag("Unit")
+    class DeductibleExpenseManagementTests {
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Income("Company B", IncomeType.OTHER, new BigDecimal("-100.00"));
-        });
+        private Long declarationId;
+        private DeclarationEntity existingDeclarationEntity;
 
-        assertEquals("Income value cannot be negative.", exception.getMessage());
-        verify(declarationRepository, never()).findById(any());
-        verify(declarationRepository, never()).save(any());
+        @BeforeEach
+        void setUp() {
+            declarationId = 1L;
+            existingDeclarationEntity = new DeclarationEntity();
+            existingDeclarationEntity.setId(declarationId);
+            existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+        }
+
+        @Test
+        @DisplayName("When taxpayer adds valid health expense Then expense should be added successfully")
+        void shouldAddDeductibleHealthExpenseSuccessfully() {
+            var expense = new DeductibleExpense("Consulta médica", ExpenseType.HEALTH, new BigDecimal("350.00"));
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+            var result = declarationService.addDeductibleExpense(declarationId, expense);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getDeductibleExpenses()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("When taxpayer adds non-deductible expense Then expense should be added successfully")
+        void shouldAcceptNonDeductibleExpense() {
+            var expense = new DeductibleExpense("Assinatura de revista", ExpenseType.OTHER, new BigDecimal("50.00"));
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+            var result = declarationService.addDeductibleExpense(declarationId, expense);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getDeductibleExpenses()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("When taxpayer removes existing expense Then expense should be removed successfully")
+        void shouldRemoveDeductibleExpenseSuccessfully() {
+            var expenseIdToRemove = 20L;
+
+            var expenseEntity = new DeductibleExpenseEntity();
+            expenseEntity.setId(expenseIdToRemove);
+            existingDeclarationEntity.setDeductibleExpenses(List.of(expenseEntity));
+
+            var expenseDomain = new DeductibleExpense(expenseIdToRemove, "Plano de Saúde", ExpenseType.HEALTH, new BigDecimal("600"));
+            when(deductibleExpenseMapper.toDomain(any(DeductibleExpenseEntity.class))).thenReturn(expenseDomain);
+
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+            var updatedDeclaration = declarationService.removeDeductibleExpense(declarationId, expenseIdToRemove);
+
+            assertThat(updatedDeclaration).isNotNull();
+            assertThat(updatedDeclaration.getDeductibleExpenses()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("When taxpayer tries to add expense with zero or negative value Then exception should be thrown")
+        void shouldRejectExpenseWithZeroValue() {
+            assertThatThrownBy(() -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, BigDecimal.ZERO))
+                    .isInstanceOf(IllegalArgumentException.class);
+
+            assertThatThrownBy(() -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, new BigDecimal("-100")))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
     }
 
-    @Test
-    @DisplayName("US2-[Scenario] Should allow different incomes from the same source")
-    void shouldAllowDifferentIncomesFromSameSource() {
-        final Long declarationId = 1L;
-        final Income income1 = new Income("Company C", IncomeType.SALARY, new BigDecimal("60000.00"));
-        final Income income2 = new Income("Company C", IncomeType.VACATION, new BigDecimal("5000.00"));
+    @Nested
+    @DisplayName("Given a taxpayer wants to view their declaration history")
+    @Tag("Unit")
+    class DeclarationHistoryTests {
 
-        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
-        existingDeclarationEntity.setId(declarationId);
-        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
-        existingDeclarationEntity.setTaxpayerId(UUID.randomUUID());
-        existingDeclarationEntity.setYear(2025);
+        @Test
+        @DisplayName("When taxpayer requests declaration history Then all declarations should be returned")
+        void shouldListPreviousDeclarations() {
+            var taxpayerId = UUID.randomUUID();
+            var d1 = new DeclarationEntity();
+            d1.setId(1L);
+            d1.setTaxpayerId(taxpayerId);
+            d1.setYear(2022);
+            d1.setStatus(DeclarationStatus.EDITING);
 
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+            var d2 = new DeclarationEntity();
+            d2.setId(2L);
+            d2.setTaxpayerId(taxpayerId);
+            d2.setYear(2023);
+            d2.setStatus(DeclarationStatus.EDITING);
 
-        declarationService.addIncome(declarationId, income1);
+            when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of(d1, d2));
 
-        Declaration updatedDeclaration = declarationService.addIncome(declarationId, income2);
+            var result = declarationService.getDeclarationHistory(taxpayerId);
 
-        assertNotNull(updatedDeclaration);
-        assertEquals(2, updatedDeclaration.getIncomes().size());
-        verify(declarationRepository, times(2)).findById(declarationId);
-        verify(declarationRepository, times(2)).save(any(DeclarationEntity.class));
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).year()).isEqualTo(2022);
+            assertThat(result.get(0).status()).isEqualTo("EDITING");
+            assertThat(result.get(1).year()).isEqualTo(2023);
+            assertThat(result.get(1).status()).isEqualTo("EDITING");
+        }
+
+        @Test
+        @DisplayName("When taxpayer has no declarations Then empty list should be returned")
+        void shouldReturnEmptyListWhenNoDeclarationsFound() {
+            var taxpayerId = UUID.randomUUID();
+            when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of());
+
+            var result = declarationService.getDeclarationHistory(taxpayerId);
+
+            assertThat(result).isEmpty();
+        }
     }
 
-    @Test
-    @DisplayName("US2-[Scenario] Should remove an income successfully")
-    void shouldRemoveIncomeSuccessfully() {
-        final Long declarationId = 1L;
-        final Long incomeIdToRemove = 10L;
+    @Nested
+    @DisplayName("Given a taxpayer wants to submit their declaration")
+    @Tag("Unit")
+    class DeclarationSubmissionTests {
 
-        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
-        existingDeclarationEntity.setId(declarationId);
-        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+        private Long declarationId;
+        private UUID taxpayerId;
+        private DeclarationEntity declarationEntity;
 
-        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING, null);
-        Income income = new Income(incomeIdToRemove, "Company A", IncomeType.SALARY, new BigDecimal("50000"));
-        declarationDomain.addIncome(income);
+        @BeforeEach
+        void setUp() {
+            declarationId = 1L;
+            taxpayerId = UUID.randomUUID();
 
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
-        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+            declarationEntity = new DeclarationEntity();
+            declarationEntity.setId(declarationId);
+            declarationEntity.setTaxpayerId(taxpayerId);
+            declarationEntity.setStatus(DeclarationStatus.EDITING);
 
-        Declaration updatedDeclaration = declarationService.removeIncome(declarationId, incomeIdToRemove);
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+        }
 
-        assertNotNull(updatedDeclaration);
-        assertTrue(updatedDeclaration.getIncomes().isEmpty());
-        assertThat(updatedDeclaration.getIncomes()).noneMatch(i -> i.getId().equals(incomeIdToRemove));
-        verify(declarationRepository).findById(declarationId);
-        verify(declarationRepository).save(any(DeclarationEntity.class));
+        @Test
+        @DisplayName("When taxpayer submits complete declaration Then declaration should be submitted successfully")
+        void shouldSubmitDeclarationSuccessfullyWhenComplete() {
+            var incomeEntity = new IncomeEntity();
+            incomeEntity.setValue(new BigDecimal("1000"));
+            declarationEntity.setIncomes(List.of(incomeEntity));
+
+            var incomeDomain = new Income("Some Company", IncomeType.SALARY, new BigDecimal("1000"));
+            when(incomeMapper.toDomain(any(IncomeEntity.class))).thenReturn(incomeDomain);
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+
+            var result = declarationService.submitDeclaration(declarationId, taxpayerId);
+
+            assertThat(result).isNotNull();
+            assertThat(result.getStatus()).isEqualTo(DeclarationStatus.DELIVERED);
+            assertThat(result.getDeliveryDate()).isNotNull();
+            verify(declarationRepository).save(any(DeclarationEntity.class));
+        }
+
+        @Test
+        @DisplayName("When taxpayer tries to submit declaration without incomes Then exception should be thrown")
+        void shouldRejectSubmissionWhenDeclarationHasNoIncomes() {
+            assertThatThrownBy(() -> declarationService.submitDeclaration(declarationId, taxpayerId))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("Cannot submit a declaration with no incomes. Please report your incomes.");
+
+            verify(declarationRepository, never()).save(any());
+        }
     }
 
-    @Test
-    @DisplayName("US2-[Scenario] Should throw exception when trying to remove a non-existent income")
-    void shouldThrowExceptionWhenRemovingNonExistentIncome() {
-        final Long declarationId = 1L;
-        final Long nonExistentIncomeId = 99L;
+    @Nested
+    @DisplayName("Given a taxpayer wants to manage dependents in their declaration")
+    @Tag("Unit")
+    class DependentManagementTests {
 
-        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
-        existingDeclarationEntity.setId(declarationId);
-        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+        private Long declarationId;
+        private DeclarationEntity existingDeclarationEntity;
 
-        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING, null);
+        @BeforeEach
+        void setUp() {
+            declarationId = 1L;
+            UUID taxpayerId = UUID.randomUUID();
+            existingDeclarationEntity = new DeclarationEntity();
+            existingDeclarationEntity.setId(declarationId);
+            existingDeclarationEntity.setTaxpayerId(taxpayerId);
+            existingDeclarationEntity.setYear(2025);
+            existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
+        }
 
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
-        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
+        @Test
+        @DisplayName("When taxpayer adds a valid dependent Then dependent should be added successfully")
+        void shouldAddValidDependentToDeclaration() {
+            var newDependent = new Dependent("Maria Silva", new Cpf("753.838.240-22"), LocalDate.of(2010, 5, 15));
 
-        Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> declarationService.removeIncome(declarationId, nonExistentIncomeId)
-        );
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
 
-        assertEquals("Income not found with id: " + nonExistentIncomeId, exception.getMessage());
-        verify(declarationRepository, never()).save(any());
-    }
+            Declaration updatedDeclaration = declarationService.addDependent(declarationId, newDependent);
 
-    @Test
-    @DisplayName("US4-[Scenario] Should add a deductible health expense successfully")
-    void shouldAddDeductibleHealthExpenseSuccessfully() {
-        final Long declarationId = 1L;
-        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
-        existingDeclarationEntity.setId(declarationId);
+            assertThat(updatedDeclaration).isNotNull();
+            assertThat(updatedDeclaration.getDependents()).hasSize(1);
 
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+            verify(declarationRepository).findById(declarationId);
+            verify(declarationRepository).save(any(DeclarationEntity.class));
+        }
 
-        DeductibleExpense expense = new DeductibleExpense("Consulta médica", ExpenseType.HEALTH, new BigDecimal("350.00"));
-        Declaration result = declarationService.addDeductibleExpense(declarationId, expense);
+        @Test
+        @DisplayName("When taxpayer removes an existing dependent Then dependent should be removed successfully")
+        void shouldRemoveDependentSuccessfully() {
+            var dependentIdToRemove = 10L;
 
-        assertNotNull(result);
-        assertEquals(1, result.getDeductibleExpenses().size());
-        assertThat(result.getDeductibleExpenses()).first().usingRecursiveComparison().isEqualTo(expense);
-        verify(declarationRepository).findById(declarationId);
-        verify(declarationRepository).save(any(DeclarationEntity.class));
-    }
+            var existingDependentEntity = new DependentEntity();
+            existingDependentEntity.setId(dependentIdToRemove);
+            existingDependentEntity.setName("Carlos Pereira");
+            existingDependentEntity.setCpf("75383824022"); // CPF sem máscara
+            existingDependentEntity.setBirthDate(LocalDate.of(2015, 3, 20));
+            existingDeclarationEntity.setDependents(List.of(existingDependentEntity));
 
-    @Test
-    @DisplayName("US4-[Scenario] Should reject expense with zero or negative value")
-    void shouldRejectExpenseWithZeroValue() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, BigDecimal.ZERO)
-        );
-        assertThrows(IllegalArgumentException.class,
-                () -> new DeductibleExpense("Inscrição", ExpenseType.EDUCATION, new BigDecimal("-100"))
-        );
-    }
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
 
-    @Test
-    @DisplayName("US4-[Scenario] Should accept a non-deductible expense")
-    void shouldAcceptNonDeductibleExpense() {
-        final Long declarationId = 1L;
-        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
-        existingDeclarationEntity.setId(declarationId);
+            var dependentDomain = new Dependent(dependentIdToRemove, "Carlos Pereira", new Cpf("753.838.240-22"), LocalDate.of(2015, 3, 20));
+            when(dependentMapper.toDomain(any(DependentEntity.class))).thenReturn(dependentDomain);
 
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+            when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
 
-        DeductibleExpense expense = new DeductibleExpense("Assinatura de revista", ExpenseType.OTHER, new BigDecimal("50.00"));
-        Declaration result = declarationService.addDeductibleExpense(declarationId, expense);
+            Declaration updatedDeclaration = declarationService.removeDependent(declarationId, dependentIdToRemove);
 
-        assertNotNull(result);
-        assertEquals(1, result.getDeductibleExpenses().size());
-        assertEquals(ExpenseType.OTHER, result.getDeductibleExpenses().get(0).getType());
-    }
+            assertThat(updatedDeclaration).isNotNull();
+            assertThat(updatedDeclaration.getDependents()).isEmpty();
+            assertThat(updatedDeclaration.getDependents()).noneMatch(d -> d.getId().equals(dependentIdToRemove));
 
-    @Test
-    @DisplayName("US4-[Scenario] Should remove a deductible expense successfully")
-    void shouldRemoveDeductibleExpenseSuccessfully() {
-        final Long declarationId = 1L;
-        final Long expenseIdToRemove = 20L;
-        DeclarationEntity existingDeclarationEntity = new DeclarationEntity();
-        existingDeclarationEntity.setId(declarationId);
-        existingDeclarationEntity.setStatus(DeclarationStatus.EDITING);
-        Declaration declarationDomain = new Declaration(declarationId, UUID.randomUUID(), 2025, DeclarationStatus.EDITING, null);
-        DeductibleExpense expense = new DeductibleExpense(expenseIdToRemove, "Plano de Saúde", ExpenseType.HEALTH, new BigDecimal("600"));
-        declarationDomain.addDeductibleExpense(expense);
+            verify(declarationRepository).findById(declarationId);
+            verify(declarationRepository).save(any(DeclarationEntity.class));
+        }
 
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
-        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
+        @Test
+        @DisplayName("When taxpayer tries to remove a non-existent dependent Then exception should be thrown")
+        void shouldThrowExceptionWhenRemovingNonExistentDependent() {
+            var nonExistentDependentId = 99L;
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(existingDeclarationEntity));
 
-        Declaration updatedDeclaration = declarationService.removeDeductibleExpense(declarationId, expenseIdToRemove);
+            assertThatThrownBy(() -> declarationService.removeDependent(declarationId, nonExistentDependentId))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("Dependent not found with id: " + nonExistentDependentId);
 
-        assertNotNull(updatedDeclaration);
-        assertTrue(updatedDeclaration.getDeductibleExpenses().isEmpty());
-    }
-
-    @DisplayName("[Scenario] Should list previous declarations")
-    void shouldListPreviousDeclarations() {
-        UUID taxpayerId = UUID.randomUUID();
-        DeclarationEntity d1 = new DeclarationEntity();
-        d1.setId(1L);
-        d1.setTaxpayerId(taxpayerId);
-        d1.setYear(2022);
-        d1.setStatus(DeclarationStatus.EDITING);
-
-        DeclarationEntity d2 = new DeclarationEntity();
-        d2.setId(2L);
-        d2.setTaxpayerId(taxpayerId);
-        d2.setYear(2023);
-        d2.setStatus(DeclarationStatus.EDITING);
-
-        when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of(d1, d2));
-
-        var result = declarationService.getDeclarationHistory(taxpayerId);
-
-        assertEquals(2, result.size());
-        assertEquals(2022, result.get(0).year());
-        assertEquals("EDITING", result.get(0).status());
-        assertEquals(2023, result.get(1).year());
-        assertEquals("EDITING", result.get(1).status());
-    }
-
-    @Test
-    @DisplayName("[Scenario] Should return empty list when no declarations found")
-    void shouldReturnEmptyListWhenNoDeclarationsFound() {
-        UUID taxpayerId = UUID.randomUUID();
-        when(declarationRepository.findAllByTaxpayerId(taxpayerId)).thenReturn(List.of());
-
-        var result = declarationService.getDeclarationHistory(taxpayerId);
-
-        assertTrue(result.isEmpty());
-    }
-    @Test
-    @DisplayName("US7-[Scenario] Should submit declaration successfully when complete")
-    void shouldSubmitDeclarationSuccessfullyWhenComplete() {
-        final Long declarationId = 1L;
-        final UUID taxpayerId = UUID.randomUUID();
-        DeclarationEntity declarationEntity = new DeclarationEntity();
-        declarationEntity.setId(declarationId);
-        declarationEntity.setTaxpayerId(taxpayerId);
-        declarationEntity.setStatus(DeclarationStatus.EDITING);
-
-        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING, null);
-        declarationDomain.addIncome(new Income("Some Company", IncomeType.SALARY, new BigDecimal("1000")));
-
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
-        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
-        when(declarationRepository.save(any(DeclarationEntity.class))).thenAnswer(i -> i.getArgument(0));
-
-        Declaration result = declarationService.submitDeclaration(declarationId, taxpayerId);
-
-        assertNotNull(result);
-        assertEquals(DeclarationStatus.DELIVERED, result.getStatus());
-        assertNotNull(result.getDeliveryDate());
-        verify(declarationRepository).save(any(DeclarationEntity.class));
-    }
-
-    @Test
-    @DisplayName("US7-[Scenario] Should reject submission when declaration has no incomes")
-    void shouldRejectSubmissionWhenDeclarationHasNoIncomes() {
-        final Long declarationId = 1L;
-        final UUID taxpayerId = UUID.randomUUID();
-        DeclarationEntity declarationEntity = new DeclarationEntity();
-        declarationEntity.setId(declarationId);
-        declarationEntity.setTaxpayerId(taxpayerId);
-        declarationEntity.setStatus(DeclarationStatus.EDITING);
-
-        Declaration declarationDomain = new Declaration(declarationId, taxpayerId, 2025, DeclarationStatus.EDITING, null);
-
-        when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
-        when(declarationMapper.toDomain(any(DeclarationEntity.class))).thenReturn(declarationDomain);
-
-        Exception exception = assertThrows(IllegalStateException.class,
-                () -> declarationService.submitDeclaration(declarationId, taxpayerId));
-
-        assertEquals("Cannot submit a declaration with no incomes. Please report your incomes.", exception.getMessage());
-        verify(declarationRepository, never()).save(any());
+            verify(declarationRepository, never()).save(any(DeclarationEntity.class));
+        }
     }
 
     @Test

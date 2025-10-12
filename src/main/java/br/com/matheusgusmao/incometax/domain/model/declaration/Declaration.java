@@ -2,6 +2,7 @@ package br.com.matheusgusmao.incometax.domain.model.declaration;
 
 import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
+import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 
@@ -19,6 +20,7 @@ public final class Declaration {
     private LocalDateTime deliveryDate;
     private final List<Income> incomes;
     private final List<DeductibleExpense> deductibleExpenses = new ArrayList<>();
+    private final List<Dependent> dependents = new ArrayList<>();
 
     private static final Pattern YEAR_REGEX_PATTERN = Pattern.compile("^\\d{4}$");
 
@@ -87,6 +89,30 @@ public final class Declaration {
                 .orElseThrow(() -> new EntityNotFoundException("Deductible expense not found with id: " + expenseId));
 
         this.deductibleExpenses.remove(expenseToRemove);
+    }
+
+    public List<Dependent> getDependents() {
+        return Collections.unmodifiableList(dependents);
+    }
+
+    public void addDependent(Dependent dependent) {
+        if (this.status != DeclarationStatus.EDITING) {
+            throw new IllegalStateException("Cannot add dependent to a declaration that is not in editing status.");
+        }
+        this.dependents.add(dependent);
+    }
+
+    public void removeDependent(Long dependentId) {
+        if (this.status != DeclarationStatus.EDITING) {
+            throw new IllegalStateException("Cannot remove dependent from a declaration that is not in editing status.");
+        }
+
+        Dependent dependentToRemove = this.dependents.stream()
+                .filter(dependent -> dependent.getId().equals(dependentId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Dependent not found with id: " + dependentId));
+
+        this.dependents.remove(dependentToRemove);
     }
 
     public void submit() {

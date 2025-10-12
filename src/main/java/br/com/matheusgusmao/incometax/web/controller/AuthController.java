@@ -50,9 +50,9 @@ public class AuthController {
             )
     })
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterUserRequest request) {
+    public ResponseEntity<RegisterUserResponse> register(@RequestBody RegisterUserRequest request) {
         final RegisterUserResponse response = authService.register(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(
@@ -79,8 +79,8 @@ public class AuthController {
             )
     })
     @PostMapping("/auth")
-    public ResponseEntity<?> authenticate(@RequestBody AuthRequest request) {
+    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest request) {
         final AuthResponse response = authService.authenticate(request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 }

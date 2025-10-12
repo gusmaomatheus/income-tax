@@ -31,21 +31,21 @@ public class AuthService {
             throw new EntityAlreadyExistsException("Email already registered: " + request.email());
         });
 
-        final String encodedPassword = passwordEncoder.encode(request.password());
-        final UUID uuid = UUID.randomUUID();
-        final UserEntity user = UserEntity.builder().id(uuid).firstName(request.firstName()).lastName(request.lastName()).email(request.email()).password(encodedPassword).role(Role.USER).build();
+        var encodedPassword = passwordEncoder.encode(request.password());
+        var uuid = UUID.randomUUID();
+        var user = UserEntity.builder().id(uuid).firstName(request.firstName()).lastName(request.lastName()).email(request.email()).password(encodedPassword).role(Role.USER).build();
 
-        final UserEntity savedUser = userRepository.save(user);
+        var savedUser = userRepository.save(user);
 
         return new RegisterUserResponse(savedUser.getId());
     }
 
     public AuthResponse authenticate(AuthRequest request) {
-        final var authentication = new UsernamePasswordAuthenticationToken(request.username(), request.password());
+        var authentication = new UsernamePasswordAuthenticationToken(request.username(), request.password());
         authenticationManager.authenticate(authentication);
 
-        final UserEntity user = userRepository.findByEmail(request.username()).orElseThrow(() -> new UsernameNotFoundException("Email not found: " + request.username()));
-        final String token = jwtService.generateToken(user);
+        var user = userRepository.findByEmail(request.username()).orElseThrow(() -> new UsernameNotFoundException("Email not found: " + request.username()));
+        var token = jwtService.generateToken(user);
 
         return new AuthResponse(token);
     }
