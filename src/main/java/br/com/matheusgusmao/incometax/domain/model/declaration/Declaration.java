@@ -1,11 +1,12 @@
 package br.com.matheusgusmao.incometax.domain.model.declaration;
 
+import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
 import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
-import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -124,5 +125,17 @@ public final class Declaration {
         }
         this.status = DeclarationStatus.DELIVERED;
         this.deliveryDate = LocalDateTime.now();
+    }
+
+    public BigDecimal calculateTotalIncome() {
+        return this.incomes.stream()
+                .map(Income::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal calculateTotalDeductions() {
+        return this.deductibleExpenses.stream()
+                .map(DeductibleExpense::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

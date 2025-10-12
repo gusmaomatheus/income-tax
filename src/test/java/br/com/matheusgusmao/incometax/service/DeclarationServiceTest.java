@@ -2,6 +2,7 @@ package br.com.matheusgusmao.incometax.service;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
+import br.com.matheusgusmao.incometax.domain.model.declaration.TaxCalculationResult;
 import br.com.matheusgusmao.incometax.domain.model.dependent.Cpf;
 import br.com.matheusgusmao.incometax.domain.model.dependent.Dependent;
 import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
@@ -9,6 +10,7 @@ import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
+import br.com.matheusgusmao.incometax.domain.service.TaxCalculationService;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
 import br.com.matheusgusmao.incometax.infra.persistence.entity.dependent.DependentEntity;
@@ -52,6 +54,8 @@ class DeclarationServiceTest {
     private DependentMapper dependentMapper;
     @InjectMocks
     private DeclarationService declarationService;
+    @InjectMocks
+    private TaxCalculationService taxCalculationService;
 
     @BeforeEach
     void setUp() {
@@ -491,6 +495,66 @@ class DeclarationServiceTest {
                     .hasMessage("Dependent not found with id: " + nonExistentDependentId);
 
             verify(declarationRepository, never()).save(any(DeclarationEntity.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Calculate Tax Due")
+    @Tag("Unit")
+    class TaxCalculationServiceTest {
+        private Long declarationId;
+
+        @BeforeEach
+        void setUp() {
+            declarationId = 1L;
+            DeclarationMapper realDeclarationMapper = new DeclarationMapper();
+            ReflectionTestUtils.setField(realDeclarationMapper, "incomeMapper", incomeMapper);
+            ReflectionTestUtils.setField(realDeclarationMapper, "deductibleExpenseMapper", deductibleExpenseMapper);
+            ReflectionTestUtils.setField(taxCalculationService, "declarationMapper", realDeclarationMapper);
+        }
+
+        @Test
+        @DisplayName("Given a declaration has no income, when the calculation is requested, then the system should return zero")
+        void shouldReturnZeroWhenDeclarationHasNoIncome() {
+            var emptyEntity = new DeclarationEntity();
+            emptyEntity.setId(declarationId);
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(emptyEntity));
+
+            TaxCalculationResult result = taxCalculationService.calculate(declarationId);
+
+            assertThat(result).isNotNull();
+            assertThat(result.taxDue()).isZero();
+        }
+
+        @Test
+        @DisplayName("Given a declaration with income and deductions, when the calculation is requested, then the progressive table is applied")
+        void shouldApplyProgressiveTableWhenDeclarationHasIncomeAndDeductions() {
+            var incomeEntity = new IncomeEntity();
+            incomeEntity.setValue(new BigDecimal("60000.00"));
+
+            var expenseEntity = new DeductibleExpenseEntity();
+            expenseEntity.setValue(new BigDecimal("5000.00"));
+
+            var declarationEntity = new DeclarationEntity();
+            declarationEntity.setId(declarationId);
+            declarationEntity.setIncomes(List.of(incomeEntity));
+            declarationEntity.setDeductibleExpenses(List.of(expenseEntity));
+            declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+
+            when(incomeMapper.toDomain(any(IncomeEntity.class)))
+                    .thenReturn(new Income("Dummy Source", IncomeType.SALARY, new BigDecimal("60000.00")));
+
+            when(deductibleExpenseMapper.toDomain(any(DeductibleExpenseEntity.class)))
+                    .thenReturn(new DeductibleExpense("Dummy Expense", ExpenseType.HEALTH, new BigDecimal("5000.00")));
+
+            TaxCalculationResult result = taxCalculationService.calculate(declarationId);
+
+            assertThat(result.totalIncome()).isEqualByComparingTo("60000.00");
+            assertThat(result.totalDeductions()).isEqualByComparingTo("5000.00");
+            assertThat(result.calculationBase()).isEqualByComparingTo("55000.00");
+            assertThat(result.taxDue()).isEqualByComparingTo("4421.76");
         }
     }
 }
