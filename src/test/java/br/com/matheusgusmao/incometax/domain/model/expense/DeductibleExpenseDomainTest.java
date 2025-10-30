@@ -33,5 +33,20 @@ public class DeductibleExpenseDomainTest {
             assertThat(expense.getValue()).isEqualTo(value);
             assertThat(expense.getId()).isNull();
         }
+        @Test
+        @DisplayName("Should create expense with id")
+        void shouldCreateExpenseWithId() {
+            var id = 1L;
+            var description = "Health Plan";
+            var type = ExpenseType.HEALTH;
+            var value = BigDecimal.valueOf(1200);
+
+            var expense = new DeductibleExpense(id, description, type, value);
+
+            assertThat(expense.getId()).isEqualTo(id);
+            assertThat(expense.getDescription()).isEqualTo(description);
+            assertThat(expense.getType()).isEqualTo(type);
+            assertThat(expense.getValue()).isEqualTo(value);
+        }
     }
 }
