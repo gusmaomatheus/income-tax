@@ -75,5 +75,12 @@ public class DeductibleExpenseDomainTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Expense value must be positive");
         }
+        @Test
+        @DisplayName("Should throw exception when value is negative")
+        void shouldThrowExceptionWhenValueIsNegative() {
+            assertThatThrownBy(() -> new DeductibleExpense("Health Plan", ExpenseType.HEALTH, BigDecimal.valueOf(-100)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Expense value must be positive");
+        }
     }
 }
