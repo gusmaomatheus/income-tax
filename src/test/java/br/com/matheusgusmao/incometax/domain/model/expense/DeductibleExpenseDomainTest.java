@@ -177,5 +177,12 @@ public class DeductibleExpenseDomainTest {
                     .isInstanceOf(NullPointerException.class)
                     .hasMessageContaining("Type cannot be null");
         }
+        @Test
+        @DisplayName("Should create expense with HEALTH type")
+        void shouldCreateExpenseWithHealthType() {
+            var expense = new DeductibleExpense("Health Plan", ExpenseType.HEALTH, BigDecimal.valueOf(100));
+
+            assertThat(expense.getType()).isEqualTo(ExpenseType.HEALTH);
+        }
     }
 }
