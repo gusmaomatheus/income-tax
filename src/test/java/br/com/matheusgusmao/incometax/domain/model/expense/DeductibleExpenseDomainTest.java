@@ -57,4 +57,16 @@ public class DeductibleExpenseDomainTest {
             }
         }
     }
+    @Nested
+    @DisplayName("DeductibleExpense Validation - Value")
+    class DeductibleExpenseValueValidationTests {
+
+        @Test
+        @DisplayName("Should throw exception when value is null")
+        void shouldThrowExceptionWhenValueIsNull() {
+            assertThatThrownBy(() -> new DeductibleExpense("Health Plan", ExpenseType.HEALTH, null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Expense value must be positive");
+        }
+    }
 }
