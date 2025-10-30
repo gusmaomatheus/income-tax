@@ -110,5 +110,12 @@ public class DeductibleExpenseDomainTest {
 
             assertThat(expense.getValue()).isEqualByComparingTo(new BigDecimal("0.01"));
         }
+        @Test
+        @DisplayName("Should accept large decimal values")
+        void shouldAcceptLargeDecimalValues() {
+            var expense = new DeductibleExpense("Expense", ExpenseType.HEALTH, new BigDecimal("999999.99"));
+
+            assertThat(expense.getValue()).isEqualByComparingTo(new BigDecimal("999999.99"));
+        }
     }
 }
