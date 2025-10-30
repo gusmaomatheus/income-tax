@@ -69,4 +69,20 @@ public class IncomeDomainTest {
         }
 
     }
+
+    @Nested
+    @DisplayName("Income Validation - Value")
+    class IncomeValueValidationTests {
+
+        @Test
+        @DisplayName("Should throw exception when value is null")
+        void shouldThrowExceptionWhenValueIsNull() {
+            assertThatThrownBy(() -> new Income("Company XYZ", IncomeType.SALARY, null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Income value cannot be negative");
+        }
+
+
+    }
+
 }
