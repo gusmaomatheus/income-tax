@@ -1,6 +1,4 @@
-package br.com.matheusgusmao.incometax.domain.model;
-import br.com.matheusgusmao.incometax.domain.model.income.Income;
-import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
+package br.com.matheusgusmao.incometax.domain.model.income;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -114,5 +112,16 @@ public class IncomeDomainTest {
             assertThat(income.getValue()).isEqualByComparingTo(new BigDecimal("999999.99"));
         }
     }
+    @Nested
+    @DisplayName("Income Validation - Paying Source")
+    class IncomePayingSourceValidationTests {
 
+        @Test
+        @DisplayName("Should throw exception when payingSource is null")
+        void shouldThrowExceptionWhenPayingSourceIsNull() {
+            assertThatThrownBy(() -> new Income(null, IncomeType.SALARY, BigDecimal.valueOf(1000)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Paying source cannot be empty");
+        }
+    }
 }
