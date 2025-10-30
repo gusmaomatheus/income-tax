@@ -51,5 +51,13 @@ public class IncomeDomainTest {
             assertThat(income.getValue()).isEqualTo(value);
         }
 
+        @Test
+        @DisplayName("Should accept zero value")
+        void shouldAcceptZeroValue() {
+            var income = new Income("Company XYZ", IncomeType.SALARY, BigDecimal.ZERO);
+
+            assertThat(income.getValue()).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+
     }
 }
