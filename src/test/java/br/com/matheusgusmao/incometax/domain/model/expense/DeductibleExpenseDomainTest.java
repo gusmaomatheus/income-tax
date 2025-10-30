@@ -144,5 +144,12 @@ public class DeductibleExpenseDomainTest {
 
             assertThat(expense.getDescription()).isEqualTo("   ");
         }
+        @Test
+        @DisplayName("Should accept empty string description")
+        void shouldAcceptEmptyStringDescription() {
+            var expense = new DeductibleExpense("", ExpenseType.HEALTH, BigDecimal.valueOf(100));
+
+            assertThat(expense.getDescription()).isEqualTo("");
+        }
     }
 }
