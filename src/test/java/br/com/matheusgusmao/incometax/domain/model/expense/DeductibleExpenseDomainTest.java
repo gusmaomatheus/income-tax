@@ -170,5 +170,12 @@ public class DeductibleExpenseDomainTest {
                     .isInstanceOf(NullPointerException.class)
                     .hasMessageContaining("Type cannot be null");
         }
+        @Test
+        @DisplayName("Should throw exception when type is null in constructor with id")
+        void shouldThrowExceptionWhenTypeIsNullInConstructorWithId() {
+            assertThatThrownBy(() -> new DeductibleExpense(1L, "Health Plan", null, BigDecimal.valueOf(100)))
+                    .isInstanceOf(NullPointerException.class)
+                    .hasMessageContaining("Type cannot be null");
+        }
     }
 }
