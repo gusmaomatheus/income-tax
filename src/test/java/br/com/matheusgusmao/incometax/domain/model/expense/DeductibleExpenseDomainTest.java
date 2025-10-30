@@ -118,4 +118,24 @@ public class DeductibleExpenseDomainTest {
             assertThat(expense.getValue()).isEqualByComparingTo(new BigDecimal("999999.99"));
         }
     }
+    @Nested
+    @DisplayName("DeductibleExpense Validation - Description")
+    class DeductibleExpenseDescriptionValidationTests {
+
+        @Test
+        @DisplayName("Should throw exception when description is null")
+        void shouldThrowExceptionWhenDescriptionIsNull() {
+            assertThatThrownBy(() -> new DeductibleExpense(null, ExpenseType.HEALTH, BigDecimal.valueOf(100)))
+                    .isInstanceOf(NullPointerException.class)
+                    .hasMessageContaining("Description cannot be null");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when description is null in constructor with id")
+        void shouldThrowExceptionWhenDescriptionIsNullInConstructorWithId() {
+            assertThatThrownBy(() -> new DeductibleExpense(1L, null, ExpenseType.HEALTH, BigDecimal.valueOf(100)))
+                    .isInstanceOf(NullPointerException.class)
+                    .hasMessageContaining("Description cannot be null");
+        }
+    }
 }
