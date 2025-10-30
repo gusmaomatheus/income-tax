@@ -34,5 +34,22 @@ public class IncomeDomainTest {
             assertThat(income.getValue()).isEqualTo(value);
             assertThat(income.getId()).isNull();
         }
+
+        @Test
+        @DisplayName("Should create income with id")
+        void shouldCreateIncomeWithId() {
+            var id = 1L;
+            var payingSource = "Company XYZ";
+            var type = IncomeType.SALARY;
+            var value = BigDecimal.valueOf(5000);
+
+            var income = new Income(id, payingSource, type, value);
+
+            assertThat(income.getId()).isEqualTo(id);
+            assertThat(income.getPayingSource()).isEqualTo(payingSource);
+            assertThat(income.getType()).isEqualTo(type);
+            assertThat(income.getValue()).isEqualTo(value);
+        }
+
     }
 }
