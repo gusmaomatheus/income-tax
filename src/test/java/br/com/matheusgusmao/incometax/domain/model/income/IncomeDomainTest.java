@@ -138,5 +138,12 @@ public class IncomeDomainTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Paying source cannot be empty");
         }
+        @Test
+        @DisplayName("Should accept non-blank payingSource")
+        void shouldAcceptNonBlankPayingSource() {
+            var income = new Income("Valid Name", IncomeType.SALARY, BigDecimal.valueOf(1000));
+
+            assertThat(income.getPayingSource()).isEqualTo("Valid Name");
+        }
     }
 }
