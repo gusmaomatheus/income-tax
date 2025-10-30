@@ -179,5 +179,12 @@ public class IncomeDomainTest {
 
             assertThat(income.getType()).isEqualTo(IncomeType.THIRTEENTH_SALARY);
         }
+        @Test
+        @DisplayName("Should create income with OTHER type")
+        void shouldCreateIncomeWithOtherType() {
+            var income = new Income("Company", IncomeType.OTHER, BigDecimal.valueOf(1000));
+
+            assertThat(income.getType()).isEqualTo(IncomeType.OTHER);
+        }
     }
 }
