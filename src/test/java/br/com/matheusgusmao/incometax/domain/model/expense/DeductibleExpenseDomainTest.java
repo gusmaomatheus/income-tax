@@ -151,5 +151,12 @@ public class DeductibleExpenseDomainTest {
 
             assertThat(expense.getDescription()).isEqualTo("");
         }
+        @Test
+        @DisplayName("Should accept valid description")
+        void shouldAcceptValidDescription() {
+            var expense = new DeductibleExpense("Valid Description", ExpenseType.HEALTH, BigDecimal.valueOf(100));
+
+            assertThat(expense.getDescription()).isEqualTo("Valid Description");
+        }
     }
 }
