@@ -105,6 +105,14 @@ public class IncomeDomainTest {
 
             assertThat(income.getValue()).isPositive();
         }
+
+        @Test
+        @DisplayName("Should accept large decimal values")
+        void shouldAcceptLargeDecimalValues() {
+            var income = new Income("Company X", IncomeType.SALARY, new BigDecimal("999999.99"));
+
+            assertThat(income.getValue()).isEqualByComparingTo(new BigDecimal("999999.99"));
+        }
     }
 
 }
