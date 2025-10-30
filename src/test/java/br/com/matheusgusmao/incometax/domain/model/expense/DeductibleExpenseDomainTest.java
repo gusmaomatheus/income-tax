@@ -103,5 +103,12 @@ public class DeductibleExpenseDomainTest {
 
             assertThat(expense.getValue()).isPositive();
         }
+        @Test
+        @DisplayName("Should accept small positive value")
+        void shouldAcceptSmallPositiveValue() {
+            var expense = new DeductibleExpense("Expense", ExpenseType.OTHER, new BigDecimal("0.01"));
+
+            assertThat(expense.getValue()).isEqualByComparingTo(new BigDecimal("0.01"));
+        }
     }
 }
