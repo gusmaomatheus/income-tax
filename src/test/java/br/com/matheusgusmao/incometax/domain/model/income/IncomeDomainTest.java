@@ -145,5 +145,12 @@ public class IncomeDomainTest {
 
             assertThat(income.getPayingSource()).isEqualTo("Valid Name");
         }
+        @Test
+        @DisplayName("Should accept payingSource with special characters")
+        void shouldAcceptPayingSourceWithSpecialCharacters() {
+            var income = new Income("Company & Co. Ltda.", IncomeType.SALARY, BigDecimal.valueOf(1000));
+
+            assertThat(income.getPayingSource()).isEqualTo("Company & Co. Ltda.");
+        }
     }
 }
