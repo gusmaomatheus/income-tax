@@ -191,5 +191,12 @@ public class DeductibleExpenseDomainTest {
 
             assertThat(expense.getType()).isEqualTo(ExpenseType.EDUCATION);
         }
+        @Test
+        @DisplayName("Should create expense with OTHER type")
+        void shouldCreateExpenseWithOtherType() {
+            var expense = new DeductibleExpense("Other", ExpenseType.OTHER, BigDecimal.valueOf(100));
+
+            assertThat(expense.getType()).isEqualTo(ExpenseType.OTHER);
+        }
     }
 }
