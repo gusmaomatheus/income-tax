@@ -159,4 +159,16 @@ public class DeductibleExpenseDomainTest {
             assertThat(expense.getDescription()).isEqualTo("Valid Description");
         }
     }
+    @Nested
+    @DisplayName("DeductibleExpense Validation - Type")
+    class DeductibleExpenseTypeValidationTests {
+
+        @Test
+        @DisplayName("Should throw exception when type is null")
+        void shouldThrowExceptionWhenTypeIsNull() {
+            assertThatThrownBy(() -> new DeductibleExpense("Health Plan", null, BigDecimal.valueOf(100)))
+                    .isInstanceOf(NullPointerException.class)
+                    .hasMessageContaining("Type cannot be null");
+        }
+    }
 }
