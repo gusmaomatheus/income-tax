@@ -164,5 +164,12 @@ public class IncomeDomainTest {
 
             assertThat(income.getType()).isEqualTo(IncomeType.SALARY);
         }
+        @Test
+        @DisplayName("Should create income with VACATION type")
+        void shouldCreateIncomeWithVacationType() {
+            var income = new Income("Company", IncomeType.VACATION, BigDecimal.valueOf(1000));
+
+            assertThat(income.getType()).isEqualTo(IncomeType.VACATION);
+        }
     }
 }
