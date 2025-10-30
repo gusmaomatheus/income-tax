@@ -97,6 +97,14 @@ public class IncomeDomainTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Income value cannot be negative");
         }
+
+        @Test
+        @DisplayName("Should accept positive value")
+        void shouldAcceptPositiveValue() {
+            var income = new Income("Company P", IncomeType.SALARY, BigDecimal.valueOf(100));
+
+            assertThat(income.getValue()).isPositive();
+        }
     }
 
 }
