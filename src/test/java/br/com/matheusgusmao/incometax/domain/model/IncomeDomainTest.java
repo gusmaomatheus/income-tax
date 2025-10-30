@@ -82,7 +82,13 @@ public class IncomeDomainTest {
                     .hasMessageContaining("Income value cannot be negative");
         }
 
-
+        @Test
+        @DisplayName("Should throw exception when value is negative")
+        void shouldThrowExceptionWhenValueIsNegative() {
+            assertThatThrownBy(() -> new Income("Company X", IncomeType.SALARY, BigDecimal.valueOf(-100)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Income value cannot be negative");
+        }
     }
 
 }
