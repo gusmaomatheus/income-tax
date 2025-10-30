@@ -89,5 +89,12 @@ public class DeductibleExpenseDomainTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Expense value must be positive");
         }
+        @Test
+        @DisplayName("Should throw exception when value is zero in constructor with id")
+        void shouldThrowExceptionWhenValueIsZeroInConstructorWithId() {
+            assertThatThrownBy(() -> new DeductibleExpense(1L, "Health Plan", ExpenseType.HEALTH, BigDecimal.ZERO))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Expense value must be positive");
+        }
     }
 }
