@@ -137,5 +137,12 @@ public class DeductibleExpenseDomainTest {
                     .isInstanceOf(NullPointerException.class)
                     .hasMessageContaining("Description cannot be null");
         }
+        @Test
+        @DisplayName("Should accept blank description")
+        void shouldAcceptBlankDescription() {
+            var expense = new DeductibleExpense("   ", ExpenseType.HEALTH, BigDecimal.valueOf(100));
+
+            assertThat(expense.getDescription()).isEqualTo("   ");
+        }
     }
 }
