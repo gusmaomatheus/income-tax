@@ -130,5 +130,13 @@ public class IncomeDomainTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Paying source cannot be empty");
         }
+
+        @Test
+        @DisplayName("Should throw exception when payingSource is empty string")
+        void shouldThrowExceptionWhenPayingSourceIsEmptyString() {
+            assertThatThrownBy(() -> new Income("", IncomeType.SALARY, BigDecimal.valueOf(1000)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Paying source cannot be empty");
+        }
     }
 }
