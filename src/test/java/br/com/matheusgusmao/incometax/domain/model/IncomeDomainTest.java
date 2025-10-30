@@ -89,6 +89,14 @@ public class IncomeDomainTest {
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Income value cannot be negative");
         }
+
+        @Test
+        @DisplayName("Should throw exception when value is negative in constructor with id")
+        void shouldThrowExceptionWhenValueIsNegativeInConstructorWithId() {
+            assertThatThrownBy(() -> new Income(1L, "Company Y", IncomeType.SALARY, BigDecimal.valueOf(-100)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Income value cannot be negative");
+        }
     }
 
 }
