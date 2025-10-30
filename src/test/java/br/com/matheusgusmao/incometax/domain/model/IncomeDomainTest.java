@@ -59,5 +59,14 @@ public class IncomeDomainTest {
             assertThat(income.getValue()).isEqualByComparingTo(BigDecimal.ZERO);
         }
 
+        @Test
+        @DisplayName("Should accept all income types")
+        void shouldAcceptAllIncomeTypes() {
+            for (IncomeType type : IncomeType.values()) {
+                var income = new Income("Source", type, BigDecimal.valueOf(1000));
+                assertThat(income.getType()).isEqualTo(type);
+            }
+        }
+
     }
 }
