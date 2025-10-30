@@ -48,5 +48,13 @@ public class DeductibleExpenseDomainTest {
             assertThat(expense.getType()).isEqualTo(type);
             assertThat(expense.getValue()).isEqualTo(value);
         }
+        @Test
+        @DisplayName("Should accept all expense types")
+        void shouldAcceptAllExpenseTypes() {
+            for (ExpenseType type : ExpenseType.values()) {
+                var expense = new DeductibleExpense("Description", type, BigDecimal.valueOf(100));
+                assertThat(expense.getType()).isEqualTo(type);
+            }
+        }
     }
 }
