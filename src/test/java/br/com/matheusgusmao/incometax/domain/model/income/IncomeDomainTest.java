@@ -171,5 +171,13 @@ public class IncomeDomainTest {
 
             assertThat(income.getType()).isEqualTo(IncomeType.VACATION);
         }
+
+        @Test
+        @DisplayName("Should create income with THIRTEENTH_SALARY type")
+        void shouldCreateIncomeWithThirteenthSalaryType() {
+            var income = new Income("Company", IncomeType.THIRTEENTH_SALARY, BigDecimal.valueOf(1000));
+
+            assertThat(income.getType()).isEqualTo(IncomeType.THIRTEENTH_SALARY);
+        }
     }
 }
