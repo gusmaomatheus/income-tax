@@ -153,4 +153,16 @@ public class IncomeDomainTest {
             assertThat(income.getPayingSource()).isEqualTo("Company & Co. Ltda.");
         }
     }
+    @Nested
+    @DisplayName("Income Types")
+    class IncomeTypesTests {
+
+        @Test
+        @DisplayName("Should create income with SALARY type")
+        void shouldCreateIncomeWithSalaryType() {
+            var income = new Income("Company", IncomeType.SALARY, BigDecimal.valueOf(1000));
+
+            assertThat(income.getType()).isEqualTo(IncomeType.SALARY);
+        }
+    }
 }
