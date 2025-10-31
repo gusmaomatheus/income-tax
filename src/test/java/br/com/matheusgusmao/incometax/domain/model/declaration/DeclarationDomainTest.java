@@ -253,5 +253,43 @@ class DeclarationDomainTest {
                     .hasMessageContaining("Dependent not found with id: 999");
         }
     }
+    @Nested
+    @DisplayName("Declaration Submission")
+    class DeclarationSubmissionTests {
+
+        @Test
+        @DisplayName("Should submit declaration when it has incomes")
+        void shouldSubmitDeclarationWhenItHasIncomes() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var income = new Income("Company A", IncomeType.SALARY, BigDecimal.valueOf(5000));
+            declaration.addIncome(income);
+
+            declaration.submit();
+
+            assertThat(declaration.getStatus()).isEqualTo(DeclarationStatus.DELIVERED);
+            assertThat(declaration.getDeliveryDate()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("Should throw exception when submitting declaration without incomes")
+        void shouldThrowExceptionWhenSubmittingDeclarationWithoutIncomes() {
+            var declaration = new Declaration(taxpayerId, 2024);
+
+            assertThatThrownBy(() -> declaration.submit())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Cannot submit a declaration with no incomes");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when submitting already submitted declaration")
+        void shouldThrowExceptionWhenSubmittingAlreadySubmittedDeclaration() {
+            var declaration = new Declaration(1L, taxpayerId, 2024, DeclarationStatus.DELIVERED, LocalDateTime.now());
+
+            assertThatThrownBy(() -> declaration.submit())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Declaration can only be submitted if it's in editing status");
+        }
+    }
+
 
 }
