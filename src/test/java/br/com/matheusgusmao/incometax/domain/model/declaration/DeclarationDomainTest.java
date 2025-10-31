@@ -73,4 +73,63 @@ class DeclarationDomainTest {
             assertThat(declaration.getDeliveryDate()).isEqualTo(deliveryDate);
         }
     }
+    @Nested
+    @DisplayName("Income Management")
+    class IncomeManagementTests {
+
+        @Test
+        @DisplayName("Should add income when declaration is in editing status")
+        void shouldAddIncomeWhenDeclarationIsInEditingStatus() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var income = new Income("Company A", IncomeType.SALARY, BigDecimal.valueOf(5000));
+
+            declaration.addIncome(income);
+
+            assertThat(declaration.getIncomes()).hasSize(1);
+            assertThat(declaration.getIncomes().get(0)).isEqualTo(income);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when adding income to submitted declaration")
+        void shouldThrowExceptionWhenAddingIncomeToSubmittedDeclaration() {
+            var declaration = new Declaration(1L, taxpayerId, 2024, DeclarationStatus.DELIVERED, LocalDateTime.now());
+            var income = new Income("Company A", IncomeType.SALARY, BigDecimal.valueOf(5000));
+
+            assertThatThrownBy(() -> declaration.addIncome(income))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Cannot add income to a declaration that is not in editing status");
+        }
+
+        @Test
+        @DisplayName("Should remove income when declaration is in editing status")
+        void shouldRemoveIncomeWhenDeclarationIsInEditingStatus() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var income = new Income(1L, "Company A", IncomeType.SALARY, BigDecimal.valueOf(5000));
+            declaration.addIncome(income);
+
+            declaration.removeIncome(1L);
+
+            assertThat(declaration.getIncomes()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing income from submitted declaration")
+        void shouldThrowExceptionWhenRemovingIncomeFromSubmittedDeclaration() {
+            var declaration = new Declaration(1L, taxpayerId, 2024, DeclarationStatus.DELIVERED, LocalDateTime.now());
+
+            assertThatThrownBy(() -> declaration.removeIncome(1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Cannot remove income from a declaration that is not in editing status");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing non-existent income")
+        void shouldThrowExceptionWhenRemovingNonExistentIncome() {
+            var declaration = new Declaration(taxpayerId, 2024);
+
+            assertThatThrownBy(() -> declaration.removeIncome(999L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Income not found with id: 999");
+        }
+    }
 }
