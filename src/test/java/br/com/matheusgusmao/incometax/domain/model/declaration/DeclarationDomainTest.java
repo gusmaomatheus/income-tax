@@ -290,6 +290,54 @@ class DeclarationDomainTest {
                     .hasMessageContaining("Declaration can only be submitted if it's in editing status");
         }
     }
+    @Nested
+    @DisplayName("Calculation Methods")
+    class CalculationMethodsTests {
+
+        @Test
+        @DisplayName("Should calculate total income correctly")
+        void shouldCalculateTotalIncomeCorrectly() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            declaration.addIncome(new Income("Company A", IncomeType.SALARY, BigDecimal.valueOf(5000)));
+            declaration.addIncome(new Income("Company B", IncomeType.SALARY, BigDecimal.valueOf(3000)));
+
+            var total = declaration.calculateTotalIncome();
+
+            assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(8000));
+        }
+
+        @Test
+        @DisplayName("Should return zero when there are no incomes")
+        void shouldReturnZeroWhenThereAreNoIncomes() {
+            var declaration = new Declaration(taxpayerId, 2024);
+
+            var total = declaration.calculateTotalIncome();
+
+            assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("Should calculate total deductions correctly")
+        void shouldCalculateTotalDeductionsCorrectly() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            declaration.addDeductibleExpense(new DeductibleExpense("Health", ExpenseType.HEALTH, BigDecimal.valueOf(1200)));
+            declaration.addDeductibleExpense(new DeductibleExpense("Education", ExpenseType.EDUCATION, BigDecimal.valueOf(800)));
+
+            var total = declaration.calculateTotalDeductions();
+
+            assertThat(total).isEqualByComparingTo(BigDecimal.valueOf(2000));
+        }
+
+        @Test
+        @DisplayName("Should return zero when there are no deductible expenses")
+        void shouldReturnZeroWhenThereAreNoDeductibleExpenses() {
+            var declaration = new Declaration(taxpayerId, 2024);
+
+            var total = declaration.calculateTotalDeductions();
+
+            assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+    }
 
 
 }
