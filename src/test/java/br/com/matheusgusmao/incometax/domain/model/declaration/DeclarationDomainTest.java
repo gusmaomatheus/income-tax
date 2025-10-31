@@ -132,4 +132,63 @@ class DeclarationDomainTest {
                     .hasMessageContaining("Income not found with id: 999");
         }
     }
+    @Nested
+    @DisplayName("Expense Management")
+    class ExpenseManagementTests {
+
+        @Test
+        @DisplayName("Should add expense when declaration is in editing status")
+        void shouldAddExpenseWhenDeclarationIsInEditingStatus() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var expense = new DeductibleExpense("Health Plan", ExpenseType.HEALTH, BigDecimal.valueOf(1200));
+
+            declaration.addDeductibleExpense(expense);
+
+            assertThat(declaration.getDeductibleExpenses()).hasSize(1);
+            assertThat(declaration.getDeductibleExpenses().get(0)).isEqualTo(expense);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when adding expense to submitted declaration")
+        void shouldThrowExceptionWhenAddingExpenseToSubmittedDeclaration() {
+            var declaration = new Declaration(1L, taxpayerId, 2024, DeclarationStatus.DELIVERED, LocalDateTime.now());
+            var expense = new DeductibleExpense("Health Plan", ExpenseType.HEALTH, BigDecimal.valueOf(1200));
+
+            assertThatThrownBy(() -> declaration.addDeductibleExpense(expense))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Cannot add expense to a declaration that is not in editing status");
+        }
+
+        @Test
+        @DisplayName("Should remove expense when declaration is in editing status")
+        void shouldRemoveExpenseWhenDeclarationIsInEditingStatus() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var expense = new DeductibleExpense(1L, "Health Plan", ExpenseType.HEALTH, BigDecimal.valueOf(1200));
+            declaration.addDeductibleExpense(expense);
+
+            declaration.removeDeductibleExpense(1L);
+
+            assertThat(declaration.getDeductibleExpenses()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing expense from submitted declaration")
+        void shouldThrowExceptionWhenRemovingExpenseFromSubmittedDeclaration() {
+            var declaration = new Declaration(1L, taxpayerId, 2024, DeclarationStatus.DELIVERED, LocalDateTime.now());
+
+            assertThatThrownBy(() -> declaration.removeDeductibleExpense(1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Cannot remove expense from a declaration that is not in editing status");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing non-existent expense")
+        void shouldThrowExceptionWhenRemovingNonExistentExpense() {
+            var declaration = new Declaration(taxpayerId, 2024);
+
+            assertThatThrownBy(() -> declaration.removeDeductibleExpense(999L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Deductible expense not found with id: 999");
+        }
+    }
 }
