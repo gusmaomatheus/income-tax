@@ -191,4 +191,67 @@ class DeclarationDomainTest {
                     .hasMessageContaining("Deductible expense not found with id: 999");
         }
     }
+    @Nested
+    @DisplayName("Dependent Management")
+    class DependentManagementTests {
+
+        @Test
+        @DisplayName("Should add dependent when declaration is in editing status")
+        void shouldAddDependentWhenDeclarationIsInEditingStatus() throws Exception {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var cpf = new Cpf("12345678909");
+            var dependent = new Dependent("John Doe", cpf, LocalDate.of(2010, 1, 1));
+
+            declaration.addDependent(dependent);
+
+            assertThat(declaration.getDependents()).hasSize(1);
+            assertThat(declaration.getDependents().get(0)).isEqualTo(dependent);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when adding dependent to submitted declaration")
+        void shouldThrowExceptionWhenAddingDependentToSubmittedDeclaration() throws Exception {
+            var declaration = new Declaration(1L, taxpayerId, 2024, DeclarationStatus.DELIVERED, LocalDateTime.now());
+            var cpf = new Cpf("12345678909");
+            var dependent = new Dependent("John Doe", cpf, LocalDate.of(2010, 1, 1));
+
+            assertThatThrownBy(() -> declaration.addDependent(dependent))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Cannot add dependent to a declaration that is not in editing status");
+        }
+
+        @Test
+        @DisplayName("Should remove dependent when declaration is in editing status")
+        void shouldRemoveDependentWhenDeclarationIsInEditingStatus() throws Exception {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var cpf = new Cpf("12345678909");
+            var dependent = new Dependent(1L, "John Doe", cpf, LocalDate.of(2010, 1, 1));
+            declaration.addDependent(dependent);
+
+            declaration.removeDependent(1L);
+
+            assertThat(declaration.getDependents()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing dependent from submitted declaration")
+        void shouldThrowExceptionWhenRemovingDependentFromSubmittedDeclaration() {
+            var declaration = new Declaration(1L, taxpayerId, 2024, DeclarationStatus.DELIVERED, LocalDateTime.now());
+
+            assertThatThrownBy(() -> declaration.removeDependent(1L))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Cannot remove dependent from a declaration that is not in editing status");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing non-existent dependent")
+        void shouldThrowExceptionWhenRemovingNonExistentDependent() {
+            var declaration = new Declaration(taxpayerId, 2024);
+
+            assertThatThrownBy(() -> declaration.removeDependent(999L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Dependent not found with id: 999");
+        }
+    }
+
 }
