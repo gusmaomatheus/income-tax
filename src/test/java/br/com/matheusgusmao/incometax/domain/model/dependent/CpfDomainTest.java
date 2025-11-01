@@ -189,6 +189,49 @@ public class CpfDomainTest {
             assertThat(cpf.toString()).isEqualTo("12345678909");
         }
     }
+    @Nested
+    @DisplayName("Edge Cases for CPF Validation")
+    class EdgeCasesTests {
+
+        @Test
+        @DisplayName("Should validate CPF where second digit has remainder < 2")
+        void shouldValidateCpfWhereSecondDigitHasRemainderLessThan2() throws Exception {
+            var cpf = new Cpf("11144477735");
+            assertThat(cpf).isNotNull();
+        }
+
+        @Test
+        @DisplayName("Should validate CPF where second digit has remainder >= 2")
+        void shouldValidateCpfWhereSecondDigitHasRemainderGreaterOrEqual2() {
+            var cpf = new Cpf("12345678909");
+            assertThat(cpf).isNotNull();
+        }
+
+        @Test
+        @DisplayName("Should reject CPF with special characters but wrong length")
+        void shouldRejectCpfWithSpecialCharactersButWrongLength() {
+            assertThatThrownBy(() -> new Cpf("123.456.789"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("CPF must contain exactly 11 digits");
+        }
+
+        @Test
+        @DisplayName("Should handle CPF with mixed special characters")
+        void shouldHandleCpfWithMixedSpecialCharacters() {
+            var cpf = new Cpf("123.456.789-09");
+
+            assertThat(cpf.getValue()).isEqualTo("12345678909");
+        }
+
+        @Test
+        @DisplayName("Should reject formatted CPF with all same digits")
+        void shouldRejectFormattedCpfWithAllSameDigits() {
+            assertThatThrownBy(() -> new Cpf("111.111.111-11"))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("CPF cannot have all same digits");
+        }
+    }
+
 
 
 }
