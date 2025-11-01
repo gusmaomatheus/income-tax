@@ -129,4 +129,45 @@ public class CpfDomainTest {
             assertThat(cpf.getValue()).isEqualTo("11144477735");
         }
     }
+    @Nested
+    @DisplayName("CPF Equality Tests")
+    class CpfEqualityTests {
+
+        @Test
+        @DisplayName("Should be equal when CPF values are the same")
+        void shouldBeEqualWhenCpfValuesAreTheSame() {
+            var cpf1 = new Cpf("12345678909");
+            var cpf2 = new Cpf("123.456.789-09");
+
+            assertThat(cpf1).isEqualTo(cpf2);
+            assertThat(cpf1.hashCode()).isEqualTo(cpf2.hashCode());
+        }
+
+        @Test
+        @DisplayName("Should not be equal when CPF values are different")
+        void shouldNotBeEqualWhenCpfValuesAreDifferent() {
+            var cpf1 = new Cpf("11144477735");
+            var cpf2 = new Cpf("12345678909");
+
+            assertThat(cpf1).isNotEqualTo(cpf2);
+        }
+
+        @Test
+        @DisplayName("Should be equal when same instance")
+        void shouldBeEqualWhenSameInstance() {
+            var cpf = new Cpf("12345678909");
+
+            assertThat(cpf).isEqualTo(cpf);
+        }
+
+        @Test
+        @DisplayName("Should not be equal when compared with different type")
+        void shouldNotBeEqualWhenComparedWithDifferentType() {
+            var cpf = new Cpf("12345678909");
+
+            assertThat(cpf).isNotEqualTo("12345678909");
+            assertThat(cpf).isNotEqualTo(null);
+        }
+    }
+
 }
