@@ -169,5 +169,26 @@ public class CpfDomainTest {
             assertThat(cpf).isNotEqualTo(null);
         }
     }
+    @Nested
+    @DisplayName("CPF String Representation")
+    class CpfStringRepresentationTests {
+
+        @Test
+        @DisplayName("Should return CPF value in toString")
+        void shouldReturnCpfValueInToString() {
+            var cpf = new Cpf("12345678909");
+
+            assertThat(cpf.toString()).isEqualTo("12345678909");
+        }
+
+        @Test
+        @DisplayName("Should return cleaned CPF value in toString")
+        void shouldReturnCleanedCpfValueInToString() {
+            var cpf = new Cpf("123.456.789-09");
+
+            assertThat(cpf.toString()).isEqualTo("12345678909");
+        }
+    }
+
 
 }
