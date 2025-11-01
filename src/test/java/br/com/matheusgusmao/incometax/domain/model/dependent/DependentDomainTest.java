@@ -87,6 +87,52 @@ public class DependentDomainTest {
             assertThat(dependent.getBirthDate()).isEqualTo(birthDate);
         }
     }
+    @Nested
+    @DisplayName("Dependent Setters")
+    class DependentSettersTests {
+
+        @Test
+        @DisplayName("Should set id when property is modified")
+        void shouldSetIdWhenPropertyIsModified() throws Exception {
+            var dependent = new Dependent("Joao", new Cpf("12345678909"), LocalDate.of(2000, 1, 1));
+
+            dependent.setId(100L);
+
+            assertThat(dependent.getId()).isEqualTo(100L);
+        }
+
+        @Test
+        @DisplayName("Should set name when property is modified")
+        void shouldSetNameWhenPropertyIsModified() throws Exception {
+            var dependent = new Dependent("Joao", new Cpf("12345678909"), LocalDate.of(2000, 1, 1));
+
+            dependent.setName("Joao Updated");
+
+            assertThat(dependent.getName()).isEqualTo("Joao Updated");
+        }
+
+        @Test
+        @DisplayName("Should set cpf when property is modified")
+        void shouldSetCpfWhenPropertyIsModified() throws Exception {
+            var dependent = new Dependent("Joao", new Cpf("12345678909"), LocalDate.of(2000, 1, 1));
+            var newCpf = new Cpf("98765432100");
+
+            dependent.setCpf(newCpf);
+
+            assertThat(dependent.getCpf()).isEqualTo(newCpf);
+        }
+
+        @Test
+        @DisplayName("Should set birth date when property is modified")
+        void shouldSetBirthDateWhenPropertyIsModified() throws Exception {
+            var dependent = new Dependent("Joao", new Cpf("12345678909"), LocalDate.of(2000, 1, 1));
+            var newDate = LocalDate.of(2010, 5, 15);
+
+            dependent.setBirthDate(newDate);
+
+            assertThat(dependent.getBirthDate()).isEqualTo(newDate);
+        }
+    }
 
 
 }
