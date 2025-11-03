@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.service;
+package br.com.matheusgusmao.incometax;
 
 import br.com.matheusgusmao.incometax.domain.model.declaration.Declaration;
 import br.com.matheusgusmao.incometax.domain.model.declaration.DeclarationStatus;
