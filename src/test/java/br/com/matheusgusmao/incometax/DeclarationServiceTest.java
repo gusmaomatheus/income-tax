@@ -9,6 +9,7 @@ import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
+import br.com.matheusgusmao.incometax.domain.service.AuthService;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
 import br.com.matheusgusmao.incometax.domain.service.TaxCalculationService;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;
@@ -21,12 +22,17 @@ import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeductibleExpense
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.DependentMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.mapper.IncomeMapper;
 import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
+import br.com.matheusgusmao.incometax.infra.persistence.repository.UserRepository;
+import br.com.matheusgusmao.incometax.infra.security.jwt.JwtService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -56,6 +62,17 @@ class DeclarationServiceTest {
     private DeclarationService declarationService;
     @InjectMocks
     private TaxCalculationService taxCalculationService;
+    @InjectMocks
+    private AuthService authService;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private AuthenticationManager authenticationManager;
+
 
     @BeforeEach
     void setUp() {
@@ -247,6 +264,17 @@ class DeclarationServiceTest {
 
             verify(declarationRepository, never()).save(any(DeclarationEntity.class));
         }
+        @Test
+        @DisplayName("When adding income to unknown declaration Then not found should be thrown")
+        void shouldThrowNotFoundWhenAddingIncomeToUnknownDeclaration() {
+            var unknownId = 777L;
+            when(declarationRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> declarationService.addIncome(unknownId,
+                    new Income("Company Z", IncomeType.OTHER, new BigDecimal("10.00"))))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("Declaration not found with id: " + unknownId);
+        }
     }
 
     @Nested
@@ -417,6 +445,14 @@ class DeclarationServiceTest {
 
             verify(declarationRepository, never()).save(any());
         }
+        @Test
+        @DisplayName("When taxpayer id does not match declaration owner Then access should be denied")
+        void shouldDenySubmissionWhenTaxpayerDoesNotOwnDeclaration() {
+            var otherTaxpayer = UUID.randomUUID();
+            assertThatThrownBy(() -> declarationService.submitDeclaration(declarationId, otherTaxpayer))
+                    .isInstanceOf(AccessDeniedException.class)
+                    .hasMessage("User is not authorized to modify this declaration.");
+        }
     }
 
     @Nested
@@ -555,6 +591,89 @@ class DeclarationServiceTest {
             assertThat(result.totalDeductions()).isEqualByComparingTo("5000.00");
             assertThat(result.calculationBase()).isEqualByComparingTo("55000.00");
             assertThat(result.taxDue()).isEqualByComparingTo("4421.76");
+        }
+        @Test
+        @DisplayName("Given base is within faixa 1, then tax is zero")
+        void shouldApplyFaixa1() {
+            var incomeEntity = new IncomeEntity();
+            incomeEntity.setValue(new BigDecimal("20000.00"));
+
+            var declarationEntity = new DeclarationEntity();
+            declarationEntity.setId(declarationId);
+            declarationEntity.setIncomes(List.of(incomeEntity));
+            declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+            when(incomeMapper.toDomain(any(IncomeEntity.class)))
+                    .thenReturn(new Income("S", IncomeType.SALARY, new BigDecimal("20000.00")));
+
+            TaxCalculationResult result = taxCalculationService.calculate(declarationId);
+            assertThat(result.taxDue()).isZero();
+        }
+
+        @Test
+        @DisplayName("Given base is within faixa 2, then faixa 2 formula is applied")
+        void shouldApplyFaixa2() {
+            var incomeEntity = new IncomeEntity();
+            incomeEntity.setValue(new BigDecimal("30000.00"));
+            var declarationEntity = new DeclarationEntity();
+            declarationEntity.setId(declarationId);
+            declarationEntity.setIncomes(List.of(incomeEntity));
+            declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+            when(incomeMapper.toDomain(any(IncomeEntity.class)))
+                    .thenReturn(new Income("S", IncomeType.SALARY, new BigDecimal("30000.00")));
+
+            TaxCalculationResult result = taxCalculationService.calculate(declarationId);
+            assertThat(result.taxDue()).isEqualByComparingTo("411.61");
+        }
+
+        @Test
+        @DisplayName("Given base is within faixa 3, then faixa 3 formula is applied")
+        void shouldApplyFaixa3() {
+            var incomeEntity = new IncomeEntity();
+            incomeEntity.setValue(new BigDecimal("44000.00"));
+            var declarationEntity = new DeclarationEntity();
+            declarationEntity.setId(declarationId);
+            declarationEntity.setIncomes(List.of(incomeEntity));
+            declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+            when(incomeMapper.toDomain(any(IncomeEntity.class)))
+                    .thenReturn(new Income("S", IncomeType.SALARY, new BigDecimal("44000.00")));
+
+            TaxCalculationResult result = taxCalculationService.calculate(declarationId);
+            assertThat(result.taxDue()).isEqualByComparingTo("2217.62");
+        }
+
+        @Test
+        @DisplayName("Given base is within faixa 5, then faixa 5 formula is applied")
+        void shouldApplyFaixa5() {
+            var incomeEntity = new IncomeEntity();
+            incomeEntity.setValue(new BigDecimal("80000.00"));
+            var declarationEntity = new DeclarationEntity();
+            declarationEntity.setId(declarationId);
+            declarationEntity.setIncomes(List.of(incomeEntity));
+            declarationEntity.setStatus(DeclarationStatus.EDITING);
+
+            when(declarationRepository.findById(declarationId)).thenReturn(Optional.of(declarationEntity));
+            when(incomeMapper.toDomain(any(IncomeEntity.class)))
+                    .thenReturn(new Income("S", IncomeType.SALARY, new BigDecimal("80000.00")));
+
+            TaxCalculationResult result = taxCalculationService.calculate(declarationId);
+            assertThat(result.taxDue()).isEqualByComparingTo("11247.95");
+        }
+
+        @Test
+        @DisplayName("When declaration not found in calculation Then not found should be thrown")
+        void shouldThrowNotFoundWhenCalculatingUnknownDeclaration() {
+            var unknownId = 1234L;
+            when(declarationRepository.findById(unknownId)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> taxCalculationService.calculate(unknownId))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("Declaration not found: " + unknownId);
         }
     }
 }
