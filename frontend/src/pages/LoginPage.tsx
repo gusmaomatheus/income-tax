@@ -24,7 +24,7 @@ export function LoginPage(): React.JSX.Element {
 
     return (
         <>
-            <div className="text-center mb-6">
+            <div className="text-center mb-10">
                 <h1 className="text-5xl font-bold text-emerald-600">
                     Taxfy
                 </h1>
