@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 
@@ -109,6 +110,16 @@ export function RegisterPage(): React.JSX.Element {
                     >
                         Cadastrar
                     </Button>
+
+                    <p className="text-sm text-center text-slate-600 !mt-5">
+                        Já possui uma conta?{' '}
+                        <Link
+                            to="/login"
+                            className="font-medium text-emerald-600 hover:text-emerald-700"
+                        >
+                            Faça login
+                        </Link>
+                    </p>
                 </form>
             </div>
         </>
