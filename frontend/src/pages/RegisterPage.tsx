@@ -1,7 +1,9 @@
+import { isAxiosError } from 'axios';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { api } from '../services/api';
 
 type FormData = {
     firstName: string;
@@ -19,6 +21,9 @@ export function RegisterPage(): React.JSX.Element {
         password: '',
     });
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const navigate = useNavigate();
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
@@ -27,14 +32,30 @@ export function RegisterPage(): React.JSX.Element {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
-        // TODO: Adicionar lógica de validação
+        setIsLoading(true);
 
-        console.log('Dados do formulário de cadastro:', formData);
-        alert('Cadastro realizado com sucesso! (Verifique o console)');
+        // TODO: Adicionar validação de frontend (ex: senha tem X caracteres)
 
-        // TODO: Enviar dados para a API usando axios
+        try {
+            await api.post('/register', formData);
+
+            alert('Cadastro realizado com sucesso! Você será redirecionado para o login.');
+            navigate('/login');
+
+        } catch (error) {
+            console.error('Erro no cadastro:', error);
+
+            let errorMessage = 'Falha ao tentar cadastrar.';
+            if (isAxiosError(error) && error.response) {
+                errorMessage = error.response.data.message || 'E-mail já cadastrado ou dados inválidos.';
+            }
+            alert(errorMessage);
+
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -108,7 +129,7 @@ export function RegisterPage(): React.JSX.Element {
                         variant="primary"
                         className="w-full !mt-6"
                     >
-                        Cadastrar
+                        {isLoading ? 'Cadastrando...' : 'Cadastrar'}
                     </Button>
 
                     <p className="text-sm text-center text-slate-600 !mt-5">
