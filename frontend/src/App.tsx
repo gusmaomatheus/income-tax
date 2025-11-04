@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import { DefaultLayout } from './components/layout/DefaultLayout';
+import { DefaultLayout } from './components/layouts/DefaultLayout';
 import { RegisterPage } from './pages/RegisterPage';
 
 function App(): React.JSX.Element {
