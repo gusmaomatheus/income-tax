@@ -29,7 +29,7 @@ export function LoginPage(): React.JSX.Element {
                     Taxfy
                 </h1>
                 <p className="text-xl text-slate-500 mt-2">
-                    "Nunca foi tão fácil escapar do leãozinho"
+                    Nunca foi tão fácil escapar do leãozinho
                 </p>
             </div>
 
