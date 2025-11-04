@@ -1,5 +1,4 @@
 {
-  "files": [],
   "compilerOptions": {
     "target": "ESNext",
     "lib": [
@@ -31,9 +30,6 @@
     "src"
   ],
   "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
     {
       "path": "./tsconfig.node.json"
     }
