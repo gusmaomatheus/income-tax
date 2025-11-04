@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import React, {
     createContext,
     useCallback,
@@ -6,6 +7,7 @@ import React, {
     useState
 } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { api } from '../services/api';
 
 interface IAuthContext {
     token: string | null;
@@ -15,6 +17,10 @@ interface IAuthContext {
 }
 
 export const AuthContext = createContext<IAuthContext | undefined>(undefined);
+
+type LoginResponse = {
+    token: string;
+};
 
 interface AuthProviderProps {
     children: React.ReactNode;
@@ -35,36 +41,36 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
 
     const login = useCallback(
         async (email: string, password: string): Promise<void> => {
-            console.log('Tentando login com:', email, password);
-
-            // TODO: Substituir por chamada real à API
-
-            const mockApiCall = (): Promise<{ token: string }> => {
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        if (email === 'user@taxfy.com' && password === '123456') {
-                            const mockToken: string =
-                                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ik1hdGhldXMgU2FudG9zIiwiZW1haWwiOiJ1c2VyQHRheGZ5LmNvbSIsImlhdCI6MTcxOTkzNDIwNn0.8_N5-0-r-sO9h4-m-s-p-s-e-c-u-r-e';
-                            resolve({ token: mockToken });
-                        } else {
-                            reject(new Error('Credenciais inválidas! (Use user@taxfy.com e 123456)'));
-                        }
-                    }, 1000);
-                });
-            };
+            console.log('Tentando login com:', email);
 
             try {
-                const data = await mockApiCall();
+                const response = await api.post<LoginResponse>(
+                    '/auth',
+                    {
+                        username: email,
+                        password: password,
+                    }
+                );
 
-                localStorage.setItem('jwt_token', data.token);
+                const { token } = response.data;
 
-                setToken(data.token);
+                localStorage.setItem('jwt_token', token);
+
+                setToken(token);
 
                 navigate('/dashboard');
 
             } catch (error) {
                 console.error('Erro no login:', error);
-                alert((error as Error).message || 'Falha ao tentar fazer login.');
+
+                let errorMessage = 'Falha ao tentar fazer login.';
+                if (isAxiosError(error) && error.response) {
+                    errorMessage = error.response.data.message || 'Credenciais inválidas.';
+                }
+
+                alert(errorMessage);
+
+                throw new Error(errorMessage);
             }
         },
         [navigate],
