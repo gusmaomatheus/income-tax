@@ -41,8 +41,6 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
 
     const login = useCallback(
         async (email: string, password: string): Promise<void> => {
-            console.log('Tentando login com:', email);
-
             try {
                 const response = await api.post<LoginResponse>(
                     '/auth',
