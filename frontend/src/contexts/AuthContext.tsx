@@ -7,7 +7,10 @@ import React, {
     useState
 } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Modal from '../components/ui/Modal';
 import { api } from '../services/api';
+
+type ModalVariant = 'info' | 'warning' | 'success';
 
 interface IAuthContext {
     token: string | null;
@@ -31,6 +34,11 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
         localStorage.getItem('jwt_token')
     );
     const navigate = useNavigate();
+
+    const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [modalMessage, setModalMessage] = useState<string>('');
+    const [modalVariant, setModalVariant] = useState<ModalVariant>('info');
+    const [modalTitle, setModalTitle] = useState<string | undefined>(undefined);
 
     useEffect(() => {
         const storedToken: string | null = localStorage.getItem('jwt_token');
@@ -59,14 +67,15 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
                 navigate('/dashboard');
 
             } catch (error) {
-                console.error('Erro no login:', error);
-
                 let errorMessage = 'Falha ao tentar fazer login.';
                 if (isAxiosError(error) && error.response) {
                     errorMessage = error.response.data.message || 'Credenciais inválidas.';
                 }
 
-                alert(errorMessage);
+                setModalTitle('Erro no login');
+                setModalMessage(errorMessage);
+                setModalVariant('warning');
+                setModalOpen(true);
 
                 throw new Error(errorMessage);
             }
@@ -90,5 +99,16 @@ export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element
         [token, login, logout],
     );
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+            <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                variant={modalVariant}
+                title={modalTitle}
+                message={modalMessage}
+            />
+        </AuthContext.Provider>
+    );
 }

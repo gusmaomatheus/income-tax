@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import Modal from '../components/ui/Modal';
 import { api } from '../services/api';
 
 type FormData = {
@@ -24,6 +25,12 @@ export function RegisterPage(): React.JSX.Element {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const navigate = useNavigate();
 
+    const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [modalMessage, setModalMessage] = useState<string>('');
+    const [modalVariant, setModalVariant] = useState<'info' | 'warning' | 'success'>('info');
+    const [modalTitle, setModalTitle] = useState<string | undefined>(undefined);
+    const [onModalClose, setOnModalClose] = useState<(() => void) | null>(null);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
         setFormData((prevData) => ({
@@ -41,8 +48,13 @@ export function RegisterPage(): React.JSX.Element {
         try {
             await api.post('/register', formData);
 
-            alert('Cadastro realizado com sucesso! Você será redirecionado para o login.');
-            navigate('/login');
+            setModalTitle('Cadastro realizado');
+            setModalMessage('Cadastro realizado com sucesso! Você será redirecionado para o login.');
+            setModalVariant('success');
+            setOnModalClose(() => () => {
+                navigate('/login');
+            });
+            setModalOpen(true);
 
         } catch (error) {
             console.error('Erro no cadastro:', error);
@@ -51,7 +63,12 @@ export function RegisterPage(): React.JSX.Element {
             if (isAxiosError(error) && error.response) {
                 errorMessage = error.response.data.message || 'E-mail já cadastrado ou dados inválidos.';
             }
-            alert(errorMessage);
+
+            setModalTitle('Erro no cadastro');
+            setModalMessage(errorMessage);
+            setModalVariant('warning');
+            setOnModalClose(null);
+            setModalOpen(true);
 
         } finally {
             setIsLoading(false);
@@ -143,6 +160,20 @@ export function RegisterPage(): React.JSX.Element {
                     </p>
                 </form>
             </div>
+
+            <Modal
+                open={modalOpen}
+                onClose={() => {
+                    setModalOpen(false);
+                    if (onModalClose) {
+                        onModalClose();
+                        setOnModalClose(null);
+                    }
+                }}
+                variant={modalVariant}
+                title={modalTitle}
+                message={modalMessage}
+            />
         </>
 
     );
