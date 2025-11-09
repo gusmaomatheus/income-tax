@@ -16,7 +16,7 @@ function App(): React.JSX.Element {
         <Route path="/login" element={<LoginPage />} />
       </Route>
 
-      <Route path="/" element={<ProtectedLayout />}>
+      <Route path="/dashboard" element={<ProtectedLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
       </Route>
     </Routes>
