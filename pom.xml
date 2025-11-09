@@ -140,8 +140,9 @@
                         <param>br.com.matheusgusmao.incometax.domain.model***</param>
                     </targetTests>
                     <mutators>
-                        <mutator>DEFAULTS</mutator>
+                        <mutator>ALL</mutator>
                     </mutators>
+                    <reportsDirectory>${project.build.directory}/pit-reports-all</reportsDirectory>
                 </configuration>
             </plugin>
             <plugin>

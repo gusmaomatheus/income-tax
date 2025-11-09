@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class DeclarationDomainTest {
 
     private UUID taxpayerId = UUID.randomUUID();
+    private final int year = 2024;
 
     @Nested
     @DisplayName("Declaration Construction")
@@ -49,6 +50,39 @@ class DeclarationDomainTest {
             assertThatThrownBy(() -> new Declaration(null, 2024))
                     .isInstanceOf(NullPointerException.class)
                     .hasMessageContaining("Taxpayer ID cannot be null");
+        }
+        @Tag("Mutation")
+        @Test
+        @DisplayName("Should correctly initialize fields for new Declaration (Constructor 1)")
+        void shouldInitializeFieldsForNewDeclaration() {
+            Declaration declaration = new Declaration(taxpayerId, year);
+
+            assertThat(declaration.getId()).isNull();
+
+            assertThat(declaration.getTaxpayerId()).isEqualTo(taxpayerId);
+            assertThat(declaration.getYear()).isEqualTo(year);
+            assertThat(declaration.getStatus()).isEqualTo(DeclarationStatus.EDITING);
+            assertThat(declaration.getIncomes()).isNotNull().isEmpty();
+            assertThat(declaration.getDeductibleExpenses()).isNotNull().isEmpty();
+            assertThat(declaration.getDependents()).isNotNull().isEmpty();
+        }
+        @Tag("Mutation")
+        @Test
+        @DisplayName("Should correctly initialize fields for rehydrated Declaration (Constructor 2)")
+        void shouldInitializeFieldsForRehydratedDeclaration() {
+            Long id = 1L;
+            DeclarationStatus status = DeclarationStatus.DELIVERED;
+            LocalDateTime deliveryDate = LocalDateTime.now();
+            Declaration declaration = new Declaration(id, taxpayerId, year, status, deliveryDate);
+            assertThat(declaration.getId()).isEqualTo(id);
+            assertThat(declaration.getTaxpayerId()).isEqualTo(taxpayerId);
+            assertThat(declaration.getYear()).isEqualTo(year);
+
+            assertThat(declaration.getStatus()).isEqualTo(status);
+            assertThat(declaration.getDeliveryDate()).isEqualTo(deliveryDate);
+            assertThat(declaration.getIncomes()).isNotNull().isEmpty();
+            assertThat(declaration.getDeductibleExpenses()).isNotNull().isEmpty();
+            assertThat(declaration.getDependents()).isNotNull().isEmpty();
         }
 
         @Test
