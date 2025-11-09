@@ -64,7 +64,7 @@ export default function Modal({
                 onClick={onClose}
                 aria-hidden
             />
-            <div className="relative z-10 max-w-md w-full bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 flex flex-col items-center text-center">
+            <div className="relative z-10 max-w-md w-full bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center">
                 <div
                     className={`flex items-center justify-center w-16 h-16 rounded-full mb-4 ${v.circleClass}`}
                 >
@@ -72,16 +72,16 @@ export default function Modal({
                 </div>
 
                 {title ? (
-                    <h3 id="modal-title" className="text-lg font-semibold mb-2">
+                    <h3 id="modal-title" className="text-lg font-semibold mb-2 text-slate-800">
                         {title}
                     </h3>
                 ) : null}
 
-                <p className="text-sm text-slate-700 dark:text-slate-300 mb-6">{message}</p>
+                <p className="text-sm text-slate-700 mb-6">{message}</p>
 
                 <button
                     type="button"
-                    className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 ${v.btnClass} focus:ring-slate-300`}
+                    className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 ${v.btnClass} focus:ring-gray-300`}
                     onClick={onClose}
                 >
                     Ok
