@@ -57,6 +57,8 @@ class DeclarationServiceTest {
     @Mock
     private DeductibleExpenseMapper deductibleExpenseMapper;
     @Mock
+    private DeclarationMapper declarationMapper;
+    @Mock
     private DependentMapper dependentMapper;
     @InjectMocks
     private DeclarationService declarationService;
@@ -674,6 +676,20 @@ class DeclarationServiceTest {
             assertThatThrownBy(() -> taxCalculationService.calculate(unknownId))
                     .isInstanceOf(EntityNotFoundException.class)
                     .hasMessage("Declaration not found: " + unknownId);
+        }
+    }
+    @Nested
+    @Tag("Mutation")
+    @DisplayName("Tests for findById")
+    class FindByIdTests {
+        @Test
+        @DisplayName("Should throw EntityNotFoundException when not found")
+        void shouldThrowNotFoundWhenFindByIdIsCalled() {
+            when(declarationRepository.findById(99L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> declarationService.findById(99L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("Declaration not found with id: 99");
         }
     }
 }

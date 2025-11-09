@@ -51,8 +51,9 @@ class DeclarationDomainTest {
                     .isInstanceOf(NullPointerException.class)
                     .hasMessageContaining("Taxpayer ID cannot be null");
         }
-        @Tag("Mutation")
+
         @Test
+        @Tag("Mutation")
         @DisplayName("Should correctly initialize fields for new Declaration (Constructor 1)")
         void shouldInitializeFieldsForNewDeclaration() {
             Declaration declaration = new Declaration(taxpayerId, year);
@@ -66,8 +67,8 @@ class DeclarationDomainTest {
             assertThat(declaration.getDeductibleExpenses()).isNotNull().isEmpty();
             assertThat(declaration.getDependents()).isNotNull().isEmpty();
         }
-        @Tag("Mutation")
         @Test
+        @Tag("Mutation")
         @DisplayName("Should correctly initialize fields for rehydrated Declaration (Constructor 2)")
         void shouldInitializeFieldsForRehydratedDeclaration() {
             Long id = 1L;
@@ -372,8 +373,8 @@ class DeclarationDomainTest {
             assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
         }
     }
-    @Tag("Mutation")
     @Nested
+    @Tag("Mutation")
     @DisplayName("Declaration Edge Cases and Mutant Coverage")
     class DeclarationEdgeCasesTests {
 

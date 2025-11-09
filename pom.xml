@@ -135,9 +135,11 @@
                 <configuration>
                     <targetClasses>
                         <param>br.com.matheusgusmao.incometax.domain.model**</param>
+                        <param>br.com.matheusgusmao.incometax.domain.service**</param>
                     </targetClasses>
                     <targetTests>
                         <param>br.com.matheusgusmao.incometax.domain.model***</param>
+                        <param>br.com.matheusgusmao.incometax.DeclarationServiceTest</param>
                     </targetTests>
                     <mutators>
                         <mutator>ALL</mutator>
