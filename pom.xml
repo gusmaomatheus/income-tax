@@ -6,7 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.6</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>br.com.matheusgusmao</groupId>
     <artifactId>incometax</artifactId>
@@ -27,7 +27,7 @@
         <url/>
     </scm>
     <properties>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -77,11 +77,6 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>0.13.0</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.pitest</groupId>
-            <artifactId>pitest-maven</artifactId>
-            <version>1.21.0</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
@@ -137,6 +132,17 @@
                         <version>1.2.1</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>br.com.matheusgusmao.incometax.domain.model**</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>br.com.matheusgusmao.incometax.domain.model***</param>
+                    </targetTests>
+                    <mutators>
+                        <mutator>DEFAULTS</mutator>
+                    </mutators>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -162,6 +168,8 @@
                             <artifactId>lombok</artifactId>
                         </path>
                     </annotationProcessorPaths>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
             <plugin>

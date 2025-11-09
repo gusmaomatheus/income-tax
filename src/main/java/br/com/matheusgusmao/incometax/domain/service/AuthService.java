@@ -27,7 +27,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public RegisterUserResponse register(RegisterUserRequest request) {
-        userRepository.findByEmail(request.email()).ifPresent(_ -> {
+        userRepository.findByEmail(request.email()).ifPresent(user -> {
             throw new EntityAlreadyExistsException("Email already registered: " + request.email());
         });
 
