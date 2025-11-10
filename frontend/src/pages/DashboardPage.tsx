@@ -1,23 +1,35 @@
-import { useAuth } from '../hooks/useAuth';
+import React from "react";
+import Card from "../components/ui/dashboard/Card";
 
 export function DashboardPage(): React.JSX.Element {
-    const { token } = useAuth();
-
     return (
-        <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">
-                Dashboard
-            </h2>
-            <p className="text-slate-600">
-                Você está autenticado!
-            </p>
+        <main>
 
-            <div className="mt-4 bg-slate-50 p-3 rounded-md overflow-x-auto">
-                <h3 className="text-sm font-semibold text-slate-700">Seu Token JWT:</h3>
-                <code className="text-xs text-emerald-700 break-all">
-                    {token}
-                </code>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Card
+                    title="Nova Declaração"
+                    description="Criar uma nova declaração de imposto de renda."
+                    path="/declaracoes/criar"
+                />
+
+                <Card
+                    title="Enviar Declaração"
+                    description="Enviar uma declaração já pronta para processamento."
+                    path="/declaracoes/enviar"
+                />
+
+                <Card
+                    title="Editar Declaração"
+                    description="Editar uma declaração existente."
+                    path="/declaracoes/editar"
+                />
+
+                <Card
+                    title="Histórico"
+                    description="Ver o histórico de declarações enviadas."
+                    path="/declaracoes/historico"
+                />
             </div>
-        </div>
+        </main>
     );
 }
