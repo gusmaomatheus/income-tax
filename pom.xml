@@ -141,6 +141,7 @@
                         <param>br.com.matheusgusmao.incometax.domain.model***</param>
                         <param>br.com.matheusgusmao.incometax.DeclarationServiceTest</param>
                         <param>br.com.matheusgusmao.incometax.TaxCalculationServiceTest</param>
+                        <param>br.com.matheusgusmao.incometax.DeclarationServiceMutationTest</param>
                     </targetTests>
                     <mutators>
                         <mutator>ALL</mutator>
