@@ -4,7 +4,7 @@ import br.com.matheusgusmao.incometax.web.dto.auth.AuthRequest;
 import br.com.matheusgusmao.incometax.web.dto.auth.AuthResponse;
 import br.com.matheusgusmao.incometax.web.dto.register.RegisterUserRequest;
 import br.com.matheusgusmao.incometax.web.dto.register.RegisterUserResponse;
-import br.com.matheusgusmao.incometax.domain.service.AuthService;
+import br.com.matheusgusmao.incometax.infra.security.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

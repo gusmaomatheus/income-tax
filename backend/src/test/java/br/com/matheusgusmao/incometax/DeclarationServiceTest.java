@@ -9,7 +9,7 @@ import br.com.matheusgusmao.incometax.domain.model.expense.DeductibleExpense;
 import br.com.matheusgusmao.incometax.domain.model.expense.ExpenseType;
 import br.com.matheusgusmao.incometax.domain.model.income.Income;
 import br.com.matheusgusmao.incometax.domain.model.income.IncomeType;
-import br.com.matheusgusmao.incometax.domain.service.AuthService;
+import br.com.matheusgusmao.incometax.infra.security.AuthService;
 import br.com.matheusgusmao.incometax.domain.service.DeclarationService;
 import br.com.matheusgusmao.incometax.domain.service.TaxCalculationService;
 import br.com.matheusgusmao.incometax.infra.exception.custom.EntityAlreadyExistsException;

@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.domain.service;
+package br.com.matheusgusmao.incometax.infra.security;
 
 import br.com.matheusgusmao.incometax.web.dto.auth.AuthRequest;
 import br.com.matheusgusmao.incometax.web.dto.auth.AuthResponse;
