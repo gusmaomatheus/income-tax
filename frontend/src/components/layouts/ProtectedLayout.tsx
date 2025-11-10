@@ -1,18 +1,19 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 export function ProtectedLayout(): React.JSX.Element {
     const { isAuthenticated } = useAuth();
+    const navigate = useNavigate();
 
     if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
+        navigate('/login');
     }
 
     return (
         <div className="min-h-screen bg-slate-100">
             <nav className="bg-white shadow-md">
                 <div className="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
-                    <h1 className="text-xl font-bold text-emerald-600">Taxfy Dashboard</h1>
+                    <h1 className="text-xl font-bold text-emerald-600 hover:cursor-pointer" onClick={() => { navigate('/dashboard') }}>Taxfy Dashboard</h1>
                     <LogoutButton />
                 </div>
             </nav>
