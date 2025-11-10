@@ -28,7 +28,7 @@ public class Cpf {
     }
 
     private boolean isAllSameDigits(String cpf) {
-        return cpf.chars().allMatch(c -> c == cpf.charAt(0));
+        return cpf.chars().distinct().count() == 1;
     }
 
     private boolean isValidCpf(String cpf) {

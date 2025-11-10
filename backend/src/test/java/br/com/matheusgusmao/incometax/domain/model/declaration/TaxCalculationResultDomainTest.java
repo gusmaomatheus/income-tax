@@ -1,20 +1,25 @@
 package br.com.matheusgusmao.incometax.domain.model.declaration;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import br.com.matheusgusmao.incometax.domain.service.TaxCalculationService;
+import br.com.matheusgusmao.incometax.infra.persistence.entity.declaration.DeclarationEntity;
+import br.com.matheusgusmao.incometax.infra.persistence.mapper.DeclarationMapper;
+import br.com.matheusgusmao.incometax.infra.persistence.repository.DeclarationRepository;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @DisplayName("TaxCalculationResult Domain - Structural Tests")
 @Tag("Structural")
 @Tag("UnitTest")
 @Tag("Unit")
 public class TaxCalculationResultDomainTest {
-
     @Nested
     @DisplayName("TaxCalculationResult Construction")
     class TaxCalculationResultConstructionTests {

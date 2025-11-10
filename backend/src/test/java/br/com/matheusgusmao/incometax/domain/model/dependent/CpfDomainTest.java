@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -31,6 +33,17 @@ public class CpfDomainTest {
             var cpf = new Cpf("123.456.789-09");
 
             assertThat(cpf.getValue()).isEqualTo("12345678909");
+        }
+        @Test
+        @Tag("Mutation")
+        @DisplayName("Should be equal when values are the same")
+        void shouldBeEqualWhenValuesAreSame() {
+            var cpf1 = new Cpf("123.456.789-09");
+            var cpf2 = new Cpf("123.456.789-09");
+
+            assertThat(cpf1.equals(cpf2)).isTrue();
+            int expectedHashCode = Objects.hash("12345678909");
+            assertThat(cpf1.hashCode()).isEqualTo(expectedHashCode);
         }
 
         @Test

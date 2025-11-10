@@ -1,4 +1,4 @@
-package br.com.matheusgusmao.incometax.domain.service;
+package br.com.matheusgusmao.incometax.infra.security;
 
 import br.com.matheusgusmao.incometax.web.dto.auth.AuthRequest;
 import br.com.matheusgusmao.incometax.web.dto.auth.AuthResponse;
@@ -27,7 +27,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public RegisterUserResponse register(RegisterUserRequest request) {
-        userRepository.findByEmail(request.email()).ifPresent(_ -> {
+        userRepository.findByEmail(request.email()).ifPresent(user -> {
             throw new EntityAlreadyExistsException("Email already registered: " + request.email());
         });
 

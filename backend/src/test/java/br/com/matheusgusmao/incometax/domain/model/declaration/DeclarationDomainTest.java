@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class DeclarationDomainTest {
 
     private UUID taxpayerId = UUID.randomUUID();
+    private final int year = 2024;
 
     @Nested
     @DisplayName("Declaration Construction")
@@ -49,6 +50,40 @@ class DeclarationDomainTest {
             assertThatThrownBy(() -> new Declaration(null, 2024))
                     .isInstanceOf(NullPointerException.class)
                     .hasMessageContaining("Taxpayer ID cannot be null");
+        }
+
+        @Test
+        @Tag("Mutation")
+        @DisplayName("Should correctly initialize fields for new Declaration (Constructor 1)")
+        void shouldInitializeFieldsForNewDeclaration() {
+            Declaration declaration = new Declaration(taxpayerId, year);
+
+            assertThat(declaration.getId()).isNull();
+
+            assertThat(declaration.getTaxpayerId()).isEqualTo(taxpayerId);
+            assertThat(declaration.getYear()).isEqualTo(year);
+            assertThat(declaration.getStatus()).isEqualTo(DeclarationStatus.EDITING);
+            assertThat(declaration.getIncomes()).isNotNull().isEmpty();
+            assertThat(declaration.getDeductibleExpenses()).isNotNull().isEmpty();
+            assertThat(declaration.getDependents()).isNotNull().isEmpty();
+        }
+        @Test
+        @Tag("Mutation")
+        @DisplayName("Should correctly initialize fields for rehydrated Declaration (Constructor 2)")
+        void shouldInitializeFieldsForRehydratedDeclaration() {
+            Long id = 1L;
+            DeclarationStatus status = DeclarationStatus.DELIVERED;
+            LocalDateTime deliveryDate = LocalDateTime.now();
+            Declaration declaration = new Declaration(id, taxpayerId, year, status, deliveryDate);
+            assertThat(declaration.getId()).isEqualTo(id);
+            assertThat(declaration.getTaxpayerId()).isEqualTo(taxpayerId);
+            assertThat(declaration.getYear()).isEqualTo(year);
+
+            assertThat(declaration.getStatus()).isEqualTo(status);
+            assertThat(declaration.getDeliveryDate()).isEqualTo(deliveryDate);
+            assertThat(declaration.getIncomes()).isNotNull().isEmpty();
+            assertThat(declaration.getDeductibleExpenses()).isNotNull().isEmpty();
+            assertThat(declaration.getDependents()).isNotNull().isEmpty();
         }
 
         @Test
@@ -338,6 +373,208 @@ class DeclarationDomainTest {
             assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
         }
     }
+    @Nested
+    @Tag("Mutation")
+    @DisplayName("Declaration Edge Cases and Mutant Coverage")
+    class DeclarationEdgeCasesTests {
 
+        @Test
+        @DisplayName("Should throw exception when year has invalid format - 2 digits")
+        void shouldThrowExceptionWhenYearHas2Digits() {
+            assertThatThrownBy(() -> new Declaration(taxpayerId, 24))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Invalid year format");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when year has invalid format - 5 digits")
+        void shouldThrowExceptionWhenYearHas5Digits() {
+            assertThatThrownBy(() -> new Declaration(taxpayerId, 20245))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("Invalid year format");
+        }
+
+        @Test
+        @DisplayName("Should remove correct income when multiple incomes exist")
+        void shouldRemoveCorrectIncomeWhenMultipleIncomesExist() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var income1 = new Income(1L, "Company A", IncomeType.SALARY, BigDecimal.valueOf(5000));
+            var income2 = new Income(2L, "Company B", IncomeType.SALARY, BigDecimal.valueOf(3000));
+            var income3 = new Income(3L, "Company C", IncomeType.SALARY, BigDecimal.valueOf(2000));
+            declaration.addIncome(income1);
+            declaration.addIncome(income2);
+            declaration.addIncome(income3);
+
+            declaration.removeIncome(2L);
+
+            assertThat(declaration.getIncomes()).hasSize(2);
+            assertThat(declaration.getIncomes()).containsExactly(income1, income3);
+            assertThat(declaration.getIncomes()).doesNotContain(income2);
+        }
+
+        @Test
+        @DisplayName("Should remove correct expense when multiple expenses exist")
+        void shouldRemoveCorrectExpenseWhenMultipleExpensesExist() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var expense1 = new DeductibleExpense(1L, "Health", ExpenseType.HEALTH, BigDecimal.valueOf(1200));
+            var expense2 = new DeductibleExpense(2L, "Education", ExpenseType.EDUCATION, BigDecimal.valueOf(800));
+            var expense3 = new DeductibleExpense(3L, "Other", ExpenseType.OTHER, BigDecimal.valueOf(500));
+            declaration.addDeductibleExpense(expense1);
+            declaration.addDeductibleExpense(expense2);
+            declaration.addDeductibleExpense(expense3);
+
+            declaration.removeDeductibleExpense(2L);
+
+            assertThat(declaration.getDeductibleExpenses()).hasSize(2);
+            assertThat(declaration.getDeductibleExpenses()).containsExactly(expense1, expense3);
+            assertThat(declaration.getDeductibleExpenses()).doesNotContain(expense2);
+        }
+
+        @Test
+        @DisplayName("Should remove correct dependent when multiple dependents exist")
+        void shouldRemoveCorrectDependentWhenMultipleDependentsExist() throws Exception {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var cpf1 = new Cpf("12345678909");
+            var cpf2 = new Cpf("98765432100");
+            var cpf3 = new Cpf("11144477735");
+            var dependent1 = new Dependent(1L, "John", cpf1, LocalDate.of(2010, 1, 1));
+            var dependent2 = new Dependent(2L, "Jane", cpf2, LocalDate.of(2012, 2, 2));
+            var dependent3 = new Dependent(3L, "Bob", cpf3, LocalDate.of(2014, 3, 3));
+            declaration.addDependent(dependent1);
+            declaration.addDependent(dependent2);
+            declaration.addDependent(dependent3);
+
+            declaration.removeDependent(2L);
+
+            assertThat(declaration.getDependents()).hasSize(2);
+            assertThat(declaration.getDependents()).containsExactly(dependent1, dependent3);
+            assertThat(declaration.getDependents()).doesNotContain(dependent2);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing income with null id")
+        void shouldThrowExceptionWhenRemovingIncomeWithNullId() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var income = new Income("Company A", IncomeType.SALARY, BigDecimal.valueOf(5000));
+            declaration.addIncome(income);
+
+            assertThatThrownBy(() -> declaration.removeIncome(null))
+                    .isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing expense with null id")
+        void shouldThrowExceptionWhenRemovingExpenseWithNullId() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var expense = new DeductibleExpense("Health", ExpenseType.HEALTH, BigDecimal.valueOf(1200));
+            declaration.addDeductibleExpense(expense);
+
+            assertThatThrownBy(() -> declaration.removeDeductibleExpense(null))
+                    .isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        @DisplayName("Should throw exception when removing dependent with null id")
+        void shouldThrowExceptionWhenRemovingDependentWithNullId() throws Exception {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var cpf = new Cpf("12345678909");
+            var dependent = new Dependent("John", cpf, LocalDate.of(2010, 1, 1));
+            declaration.addDependent(dependent);
+
+            assertThatThrownBy(() -> declaration.removeDependent(null))
+                    .isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        @DisplayName("Should return unmodifiable list for deductible expenses")
+        void shouldReturnUnmodifiableListForDeductibleExpenses() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var expense = new DeductibleExpense("Health", ExpenseType.HEALTH, BigDecimal.valueOf(1200));
+            declaration.addDeductibleExpense(expense);
+
+            var expenses = declaration.getDeductibleExpenses();
+
+            assertThatThrownBy(() -> expenses.add(new DeductibleExpense("Education", ExpenseType.EDUCATION, BigDecimal.valueOf(800))))
+                    .isInstanceOf(UnsupportedOperationException.class);
+        }
+
+        @Test
+        @DisplayName("Should return unmodifiable list for dependents")
+        void shouldReturnUnmodifiableListForDependents() throws Exception {
+            var declaration = new Declaration(taxpayerId, 2024);
+            var cpf = new Cpf("12345678909");
+            var dependent = new Dependent("John", cpf, LocalDate.of(2010, 1, 1));
+            declaration.addDependent(dependent);
+
+            var dependents = declaration.getDependents();
+
+            assertThatThrownBy(() -> {
+                var newCpf = new Cpf("98765432100");
+                dependents.add(new Dependent("Jane", newCpf, LocalDate.of(2012, 2, 2)));
+            }).isInstanceOf(UnsupportedOperationException.class);
+        }
+
+        @Test
+        @DisplayName("Should calculate total income with multiple incomes correctly")
+        void shouldCalculateTotalIncomeWithMultipleIncomesCorrectly() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            declaration.addIncome(new Income("Company A", IncomeType.SALARY, new BigDecimal("5000.50")));
+            declaration.addIncome(new Income("Company B", IncomeType.VACATION, new BigDecimal("3000.25")));
+            declaration.addIncome(new Income("Company C", IncomeType.THIRTEENTH_SALARY, new BigDecimal("2000.75")));
+
+            var total = declaration.calculateTotalIncome();
+
+            assertThat(total).isEqualByComparingTo(new BigDecimal("10001.50"));
+        }
+
+        @Test
+        @DisplayName("Should calculate total deductions with multiple expenses correctly")
+        void shouldCalculateTotalDeductionsWithMultipleExpensesCorrectly() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            declaration.addDeductibleExpense(new DeductibleExpense("Health", ExpenseType.HEALTH, new BigDecimal("1200.50")));
+            declaration.addDeductibleExpense(new DeductibleExpense("Education", ExpenseType.EDUCATION, new BigDecimal("800.25")));
+            declaration.addDeductibleExpense(new DeductibleExpense("Other", ExpenseType.OTHER, new BigDecimal("500.75")));
+
+            var total = declaration.calculateTotalDeductions();
+
+            assertThat(total).isEqualByComparingTo(new BigDecimal("2501.50"));
+        }
+
+        @Test
+        @DisplayName("Should handle year 1000")
+        void shouldHandleYear1000() {
+            var declaration = new Declaration(taxpayerId, 1000);
+            assertThat(declaration.getYear()).isEqualTo(1000);
+        }
+
+        @Test
+        @DisplayName("Should handle year 9999")
+        void shouldHandleYear9999() {
+            var declaration = new Declaration(taxpayerId, 9999);
+            assertThat(declaration.getYear()).isEqualTo(9999);
+        }
+
+        @Test
+        @DisplayName("Should calculate total income with zero values")
+        void shouldCalculateTotalIncomeWithZeroValues() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            declaration.addIncome(new Income("Company A", IncomeType.SALARY, BigDecimal.ZERO));
+            declaration.addIncome(new Income("Company B", IncomeType.SALARY, BigDecimal.ZERO));
+
+            var total = declaration.calculateTotalIncome();
+            assertThat(total).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("Should calculate total deductions with zero values")
+        void shouldCalculateTotalDeductionsWithZeroValues() {
+            var declaration = new Declaration(taxpayerId, 2024);
+            declaration.addDeductibleExpense(new DeductibleExpense("Health", ExpenseType.HEALTH, new BigDecimal("0.01")));
+
+            var total = declaration.calculateTotalDeductions();
+
+            assertThat(total).isEqualByComparingTo(new BigDecimal("0.01"));
+        }
+    }
 
 }

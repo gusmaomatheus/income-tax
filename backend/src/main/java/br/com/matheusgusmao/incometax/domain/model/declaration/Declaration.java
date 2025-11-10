@@ -14,12 +14,12 @@ import java.util.regex.Pattern;
 @Getter
 public final class Declaration {
 
-    private final Long id;
+    private Long id;
     private final UUID taxpayerId;
     private final int year;
     private DeclarationStatus status;
     private LocalDateTime deliveryDate;
-    private final List<Income> incomes;
+    private final List<Income> incomes = new ArrayList<>();
     private final List<DeductibleExpense> deductibleExpenses = new ArrayList<>();
     private final List<Dependent> dependents = new ArrayList<>();
 
@@ -32,11 +32,9 @@ public final class Declaration {
             throw new IllegalArgumentException("Invalid year format: " + year);
         }
 
-        this.id = null;
         this.taxpayerId = taxpayerId;
         this.year = year;
         this.status = DeclarationStatus.EDITING;
-        this.incomes = new ArrayList<>();
     }
 
     public Declaration(Long id, UUID taxpayerId, int year, DeclarationStatus status, LocalDateTime deliveryDate) {
@@ -44,7 +42,6 @@ public final class Declaration {
         this.taxpayerId = taxpayerId;
         this.year = year;
         this.status = status;
-        this.incomes = new ArrayList<>();
         this.deliveryDate = deliveryDate;
 
     }
