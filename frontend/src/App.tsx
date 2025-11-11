@@ -6,6 +6,7 @@ import { ProtectedLayout } from './components/layouts/ProtectedLayout';
 
 import { CreateDeclarationPage } from './pages/CreateDeclarationPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { DeclarationsHistoryPage } from './pages/DeclarationHistoryPage';
 import { EditDeclarationPage } from './pages/EditDeclarationPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -27,6 +28,7 @@ function App(): React.JSX.Element {
         <Route path="/declaracoes/criar" element={<CreateDeclarationPage />} />
         <Route path="/declaracoes/enviar" element={<SubmitDeclarationPage />} />
         <Route path="/declaracoes/editar/:id" element={<EditDeclarationPage />} />
+        <Route path="/declaracoes/historico" element={<DeclarationsHistoryPage />} />
       </Route>
     </Routes>
   );
